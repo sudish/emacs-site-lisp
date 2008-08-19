@@ -1,0 +1,1783 @@
+% -*-texinfo-*-
+
+%
+% To make a printed copy of this manual do the following:
+%
+% tex dmacro.texinfo
+% texindex dmacro.??
+% tex dmacro.texinfo
+%
+% A dmacro.dvi file will be created. The usual printing command is
+% lpr -d dmacro.dvi
+%
+
+\input texinfo
+@comment %**start of header (This is for running Texinfo on a region.)
+@setfilename dmacro.info
+@settitle Dynamic Macro
+@comment %**end of header (This is for running Texinfo on a region.)
+
+@synindex vr fn
+
+@ifinfo
+This file documents Dynamic Macro.
+Copyright (c) 1991 Wayne Mesard.
+@end ifinfo
+
+@titlepage
+@sp 15
+@center @titlefont{Dynamic Macro}
+@sp 2
+@center A program for creating structured text in GNU Emacs
+@sp 2
+@center Wayne Mesard
+@sp 2
+@center May 1995, Version 2.5
+@page
+@vskip 0pt plus 1filll
+Copyright @copyright{} 1995 Wayne Mesard.
+
+Permission is granted to make and distribute verbatim copies of
+this manual provided the copyright notice and this permission notice
+are preserved on all copies.
+
+@ignore
+Permission is granted to process this file through Tex and print the
+results, provided the printed document carries copying permission
+notice identical to this one except for the removal of this paragraph
+(this paragraph not being relevant to the printed manual).
+
+@end ignore
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided that the entire
+resulting derived work is distributed under the terms of a permission
+notice identical to this one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the same conditions as for modified versions.
+@end titlepage
+
+@node Top, Administrivia,, (dir)
+@ifinfo
+
+This is Dmacro version 2.5, by Wayne Mesard (@samp{WMesard@@sgi.com}).
+Dmacro is a program for creating structured text in Emacs.
+
+@end ifinfo
+@menu
+* Administrivia::		Distribution, licensing, acknowledgments
+* Overview::			What is Dynamic Macro?
+* Tutorial::			DM-C (An example of Dynamic Macro usage)
+* Using Dmacro::		The Dmacro interface
+* Installation::		Installing Dynamic Macro
+* Creating Macros::		Building new macros
+* Customization::		Tuning Dmacro's behavior
+* Defining New Directives::     Creating new directives for use in macros
+* Release Notes::		Changes Since Dmacro Version 2.0
+* Glossary::			Terms used in this manual
+
+* Key Index::
+* Function and Variable Index::
+* Concept Index::
+@end menu
+@node Administrivia, Overview,Top,Top
+@comment  node-name,  next,  previous,  up
+@unnumbered Administrivia
+
+This manual and the Dmacro software package may be redistributed only
+under the terms of the GNU General Public License.
+@xref{License,License,General Public License,Emacs,Gnu Emacs Manual}, for details.
+
+This release has been tested with Emacs19 (version 2.0 did have a couple
+of compatability problems with Emacs19).  This version doesn't work with
+Emacs18, but that's only because I used add-hook.  (Obnoxious aren't I?)
+It should work with Lucid Emacs, etc.  
+
+Questions, problems, suggestions should be sent to
+@samp{WMesard@@sgi.com}.  Enhancement requests are always welcome.  Be
+sure to mention the version of Dmacro that you're using. @refill
+
+```Dmacro'?!  That's a terrible name.  It sounds like a brand of rat poison.''
+     -MD 10/91.
+
+@node Overview, Tutorial,Administrivia, Top
+@unnumbered Overview
+
+Dynamic Macro is a program for creating structured text in Emacs.  It
+can significantly reduce typing time and increase the formatting
+consistency of source code and other structured text.  It allows users
+to easily construct and use dynamic macros for complex text such as time
+stamps, comments and common program blocks.
+
+There are three levels of interaction with Dmacro:
+
+@itemize @bullet
+@item
+Dmacro users -- people who use existing Dmacro files when writing source
+code or some other document.
+@item
+Dmacro builders -- people who create new Dmacro files or modify old ones.
+Requires minimal knowledge of Elisp (e.g., what a symbol is; how to
+customize a @file{.emacs} file).
+@item
+Dmacro function builders -- people who create new functions.  Requires
+proficiency in Elisp (e.g., how to invoke and define Elisp functions).
+@end itemize
+
+This document covers each of these levels more or less in sequence.  So
+if you find yourself getting bored and/or confused, you've probably read
+far enough.
+
+@node Tutorial,Using Dmacro,Overview,Top
+@comment  node-name,  next,  previous,  up
+@chapter Dmacros for C --- A tutorial
+
+@cindex dmacros for C
+@cindex DM-C
+This section is a step-by-step illustration of how a user interacts
+with Dmacro.  Most of Dmacro's basic features will be touched on.
+Familiarity with Emacs is expected.  The example uses a collection of
+macros built for writing C programs.  Familiarity with C is not
+required for this tutorial, but it will probably help.
+
+If Dmacro has already been properly installed at your site
+(@pxref{Installation}), simply start up Emacs and type:
+
+@example
+@kbd{M-x load-library @key{RET} dm-c @key{RET}}
+@end example
+
+If you want to take it for a test drive before installing it, first make
+sure that the distribution directory is your current working directory,
+then invoke Emacs and type: @refill
+
+@example
+@kbd{M-x load-file @key{RET} dm-c.el @key{RET}}
+@end example
+
+If either of these produces an error message, contact your
+system administrator or local Emacs guru for help.
+
+Now let's begin, the demo.  Since the macros we're working with are
+for writing C programs, we need an empty C-mode buffer to work with.
+Type:
+
+@example
+@kbd{C-x C-f ~/dmacro-demo.c @key{RET}}
+@end example
+@iftex
+@cindex automatic macro insertion
+@end iftex
+@noindent
+But wait a minute!  Even though it's a new file,  it contains a comment
+block like this:
+
+@example
+/* Copyright (c) 1991 by A BIG Corporation.  All Rights Reserved */
+
+/***
+   NAME
+     dmacro-demo
+   PURPOSE
+
+   NOTES
+
+   HISTORY
+     wmesard - Dec 24, 1991: Created.
+***/
+@end example
+
+@noindent
+What happened was that the @code{masthead} macro automatically got
+inserted when you created the file.  As you can see, @code{masthead}
+contains standard information that might go at the top of any C file.
+Notice that it contains the current year and date as well as your user
+id.  It also contains the name of the current file, @file{dmacro-demo}.
+The cursor is positioned on the line below the @samp{PURPOSE} header so
+that you may immediately begin typing to fill in the rest of the
+comment block.
+
+Automatic macro insertion is just the beginning; you can also insert
+macros explicitly.  But first move the cursor below the comment
+block, to the very end of the buffer:
+
+@example
+@kbd{M->}
+@end example
+
+Now type:
+
+@iftex
+@kindex C-c d
+@end iftex
+@example
+@kbd{C-c d}
+@end example
+
+@noindent
+This invokes the command, @code{insert-dmacro}.  Notice that you are being
+prompted for the name of a dynamic macro in the minibuffer. Type:
+
+@example
+@kbd{m}
+@end example
+
+@noindent
+followed by a question mark:
+
+@example
+@kbd{?}
+@end example
+
+@cindex completion in the minibuffer
+In the @samp{*Completions*} buffer, Dmacro displays a list of all
+macros that have names beginning with @samp{m}:
+
+@example
+Possible completions are:
+main    mal
+masthead
+@end example
+
+@noindent
+Type question mark a second time:
+
+@example
+@kbd{?}
+@end example
+
+@noindent
+Now the list in the @samp{*Completions*} buffer has expanded so that each
+macro name is accompanied by a brief description:
+
+@example
+@group
+Possible completions are:
+
+main:     an empty main() function with args
+mal:      call to malloc (prompts for var type)
+masthead: comment block for the top of a .c file
+@end group
+@end example
+
+@noindent
+This two-level help feature can be used whenever you are being prompted
+for a macro name.  (Feel free to use it as we progress through this
+tutorial, even though we won't mention it again until the very end.
+In this case we want @code{main}, @strong{so finish typing the word and hit
+@key{RET}.}
+
+The @code{main} macro gets inserted into the buffer.  The cursor is now
+positioned in the [empty] body of the function, ready for you to begin
+typing:
+
+@example
+main(argv, argc)
+char **argv;
+int argc;
+@{
+
+@}
+@end example
+
+Let's insert a printf statement.  For this we use the @code{p} macro.
+Type:
+
+@example
+@kbd{C-c d p @key{RET}}
+@end example
+
+@noindent
+The following is inserted with the cursor at the start of the string:
+
+@example
+(void) printf("\n");
+@end example
+
+@noindent
+Finish the command by typing some text like @samp{Hello world}.
+
+Now, let's make the program a little more interesting.  @strong{Position
+the cursor after the left curly brace (@samp{@{}) and hit
+@key{Linefeed}}.  Add a variable declaration before the printf command: @refill
+
+@example
+@kbd{int mycounter;}
+@end example
+
+Now let's try a @code{for} loop.  @strong{Move the cursor so that it's
+on the right curly brace (@samp{@}}).} and type:
+
+@example
+@kbd{C-c d ifor @key{RET}.}
+@end example
+
+@noindent
+The skeleton of a for statement is inserted:
+
+@example
+@group
+for (<var> = 0; <var> < ; ++<var>)
+@{
+
+@}
+@end group
+@end example
+
+@noindent
+and in the minibuffer, Dmacro is prompting you for the name of the
+increment variable to use.  Enter the name of the variable you just
+declared:
+
+@example
+@kbd{mycounter @key{RET}}
+@end example
+
+Notice that the placeholders are replaced by the variable name and the
+entire statement is indented properly:
+
+@example
+  for (mycounter = 0; mycounter < ; ++mycounter)
+  @{
+
+  @}
+@end example
+
+@noindent
+And, as usual, the cursor is positioned at the point where you're mostly
+likely to type next.  @strong{Type a @kbd{5}} to complete the upper
+bounds condition of the loop.
+
+In addition to setting the point in the right place, the @code{ifor}
+macro sets a mark in its body.  (In fact, this is true of many of the
+macros defined in @file{dm-c}.)  So instead of cursoring down to
+fill in the body, you can simply type:
+
+@example
+@kbd{C-x C-x}
+@end example
+
+@noindent
+to run the Emacs command @code{exchange-point-and-mark}.  (@samp{Point}
+is Emacs terminology for the cursor.  @xref{Mark,Mark,The Mark and the
+Region,Emacs, GNU Emacs Manual}, for more information about marks.)  @refill
+
+Using the @code{p} macro as before, create the following line (notice
+that @kbd{C-x C-x} does the right thing in the @code{p} macro, too):
+
+@example
+(void) printf("value is %d\n", mycounter);
+@end example
+
+Suppose we decide that we want to print something else when the variable
+is equal to three.  That means we want to wrap the printf command in a
+conditional statement.  Type:
+
+@example
+@kbd{C-u C-c l}
+@end example
+
+@noindent
+(Note that that last character is an @samp{L} not the number @samp{1}).  At
+the familiar @samp{Dmacro:} prompt, type:
+
+@example
+@kbd{ife @key{RET}}
+@end example
+
+@noindent
+The for loop now looks like:
+
+@example
+if ()
+  (void) printf("value is %d\n", mycounter);
+else
+@end example
+
+@iftex
+@kindex C-c l
+@cindex wrapping
+@end iftex
+Okay, a lot just happened.  Let's look at it again in slow motion.
+We'll get to that @kbd{C-u} in a minute.  First let's look at the
+@kbd{C-c l}.  This key sequence invokes the command
+@code{dmacro-wrap-line}.  This is similar to @code{insert-dmacro}
+(@kbd{C-c d}), but instead of merely inserting the macro, it
+@emph{wraps} the current line inside of the macro.  If you look at
+the buffer, that's exactly what happened: the old printf statement got
+stuck in the middle of the if/else macro. @refill
+
+You may be wondering how Dmacro decides where to stick the text.  As
+we've seen, many macros leave the cursor strategically positioned
+after they're inserted.  Normally, @code{dmacro-wrap-line} sticks the old
+text at this point.  However, in the current example, the @code{ife}
+macro leaves the cursor in the parenthesis immediately after the
+word @code{if}.
+
+So how did the @code{printf} wind up on the next line?  As we saw with
+@code{ifor}, many macros also set marks.  @code{ife} does just that, it
+sets a mark where the then and else clauses go.  And that's where the
+mysterious C-u comes in.  It tells @code{dmacro-wrap-line} to swap the
+point and the first mark.
+@xref{Using Dmacro}, for more information about this command, and it's sibling,
+@code{dmacro-wrap-region}. @refill
+
+Now back to our tutorial.  Type:
+
+@example
+@kbd{C-x C-x}
+@end example
+
+@noindent
+The cursor jumps back to the mark (which would normally be the point).
+Enter the condition for the if statement:
+
+@example
+@kbd{mycounter != 3}
+@end example
+
+@strong{Now move the cursor down to the line below the word @samp{else}
+and enter the else clause} (using the @code{p} macro if you like):
+
+@example
+(void) printf("and now for something completely different\n");
+@end example
+
+Finally, lets add a comment.  @strong{Move the cursor up to the beginning of
+the main() body and create a blank line.}  Now put a comment on that
+line by typing:
+
+@example
+@kbd{M-; Tab}
+@end example
+
+@noindent
+An empty comment gets created.  (This is an Emacs thing, not a Dmacro
+thing, although it would be easy to create a macro to do this.)  Fill
+it in so that it looks something like:
+
+@example
+/* Print the value iff it isn't 3 */
+@end example
+
+Since you're a conscientious programmer, you want to initial and date
+this comment, so others will know who to blame.  Type:
+@iftex
+@kindex C-c t
+@end iftex
+
+@example
+@kbd{C-c t}
+@end example
+
+@noindent
+Notice that your initials and today's date get inserted so that the
+line looks something like:
+
+@example
+/* Print the value iff it isn't 3 -wsm12/24/91.*/
+@end example
+
+Time for some more slow motion playback.  Any macro can be bound to a
+key sequence.  This makes it easy to invoke frequently used macros.  In
+this case, @file{dm-c} has a macro named @code{dstamp} that it binds to
+@kbd{C-c t}.  (The @kbd{t} stands for ``timestamp''.)  So another way to
+do what you just did would be to type:
+
+@example
+@kbd{C-c d dstamp @key{RET}}
+@end example
+
+Let's undo what we just did and do it again the long way.  This will
+also give us a chance to show off another feature of the @samp{Dmacro:}
+prompt.
+Type:
+
+@example
+@kbd{C-x u}
+@end example
+
+@noindent
+(or which ever key the @code{undo} command is bound to on your system)
+to undo the last action.  Then type:
+
+@example
+@kbd{C-c d d}
+@end example
+
+@noindent
+but don't hit @key{RET} yet.  Type a question mark:
+
+@example
+@kbd{?}
+@end example
+
+@iftex
+@cindex completion in the minibuffer
+@end iftex
+Notice that several macro names start with the letter @samp{d} but only
+@code{dstamp} starts with the letters @code{ds} Wouldn't it be nice if you
+only had to type enough letters of a macro name to identify it uniquely,
+rather than typing the entire name?  Well in fact, you can.  Type:
+
+@example
+@kbd{s @key{RET}}
+@end example
+
+@noindent
+The @code{dstamp} macro gets inserted (again).
+
+Now let's take a look at your final product:
+
+@example
+@group
+/* Copyright (c) 1991 by A BIG Corporation.  All Rights Reserved */
+
+/***
+   NAME
+     dmacro-demo
+   PURPOSE
+     To learn about Dmacro.
+   NOTES
+
+   HISTORY
+     wmesard - Dec 24, 1991: Created.
+***/
+@end group
+
+@group
+main(argc, argv)
+int argc;
+char **argv;
+@{
+  int mycounter;
+
+  (void) printf("Hello world\n");
+  for (mycounter = 0; mycounter < 5; ++mycounter)
+  @{
+    /* Print the value iff it isn't 3 -wmesard12/24/91. */
+    if (mycounter != 3)
+      (void) printf("value is %d\n", mycounter);
+    else
+      (void) printf("and now for something completely different\n");
+  @}
+@}
+@end group
+@end example
+
+You've created a runnable (albeit, not very useful) C program with far
+less wear and tear on your fingertips.  Once you get used to Dmacro,
+you'll find that it will significantly reduce the amount of time you
+spend typing.  It can also reduce the effort needed to get programs to
+compile since it reduces the risk of syntax errors.
+
+There are many more macros defined in @file{dm-c} than the few we covered
+here.  To list them all type:
+@iftex
+@kindex C-c d ?
+@end iftex
+
+@example
+@kbd{C-c d ?}
+@end example
+
+This collection of macros can be used by any C programmer, but it
+was based on the coding standards of one particular software house.
+You are encouraged to extend and customize it to suit your needs.
+@xref{Creating Macros} for details on how to do this.
+
+@node Using Dmacro,Installation,Tutorial,Top
+@comment  node-name,  next,  previous,  up
+@chapter Using Dmacro
+
+This section describes the commands and keys users invoke when inserting
+macros.
+@xref{Customization,,dont-bind-my-keys}, for information
+about changing the default key bindings. @refill
+
+@menu
+* dmacro-load::		        Reading in a set of Dmacro tables
+* insert-dmacro::		Basic insertion function
+* dmacro-wrap-line::		Wrapping a macro around the current line
+* dmacro-wrap-region::		Wrapping a macro around the current region
+@end menu
+
+@node dmacro-load,insert-dmacro,,Using Dmacro
+@section dmacro-load
+
+A Dmacro file is a file containing macro definitions (e.g., the
+@file{demo.dm} file which came with the Dmacro distribution).
+@xref{Installation}, for information about making a collection of
+macros a permanent part of your Emacs environment.  To load Dmacro
+files on a per-session basis use the @code{dmacro-load} command: @refill
+
+@example
+@kbd{M-x dmacro-load @key{RET} ~/elisp/demo.dm @key{RET}}
+@end example
+
+@node insert-dmacro,dmacro-wrap-line,dmacro-load,Using Dmacro
+@section insert-dmacro
+
+@findex insert-dmacro
+@kindex C-c d
+@kindex C-c d ?
+This is the main interface to Dmacro.  It is normally bound to
+@kbd{C-c d}.  It prompts for a macro name.  Question mark (@kbd{?})
+and @kbd{@key{TAB}} work as expected during prompting.  For example, if
+you type @kbd{ds} followed by question mark at the prompt, a buffer will
+pop up containing a list of macro names that start with the letters
+@samp{ds}.  If you type @kbd{?} again it will also display the
+documentation for those macros, or the actual macro text if the
+macro is undocumented. @refill
+
+After entering the name, the macro is expanded and inserted in the
+current buffer.
+
+@node dmacro-wrap-line,dmacro-wrap-region,insert-dmacro,Using Dmacro
+@section dmacro-wrap-line
+
+@findex dmacro-wrap-line
+@cindex wrapping a line
+@kindex C-c l
+This is similar to @code{insert-dmacro} except that it has the effect
+of sticking the current line in the middle of the to-be-inserted
+macro.  It is normally bound to @kbd{C-c l}.  For example, consider
+a macro named @code{ife} that expands to:
+
+@example
+if (@var{p})
+  @var{m}
+else
+  @var{m}
+@end example
+
+@cindex marks
+where the @var{p} represents where the point winds up and each @var{m}
+indicates a mark.  If you type @samp{abc} on a line by itself and then
+invoke @code{dmacro-wrap-line}, the result will look like:
+
+@example
+if (abc)
+
+else
+@end example
+
+With a prefix argument the line will be wrapped at a mark instead of
+point.  So in the current example, typing @kbd{C-u C-c l} would produce:
+
+@example
+if ()
+  abc
+else
+@end example
+
+If a macro has more than one mark, you select which one to wrap at
+with a prefix argument.  So typing @kbd{C-u 2 C-c l} would use
+the second mark, producing:
+
+@example
+if ()
+
+else
+  abc
+@end example
+
+(The observant Emacs user will note that the default value of a prefix
+argument is 4.  So why did @kbd{C-u C-c C-l} use the first mark?
+Because Dmacro knows to use the first mark if the user specifies one
+that doesn't exist.  (So it looked for a fourth mark, didn't find it,
+and used the first one instead.)  Since most macros have, at most,
+two or three marks, this is a useful shortcut.)
+
+What's actually happening is that the original line is being deleted,
+then the macro is inserted, then the original text is put back in.
+This mechanism allows the same macros to be used for both wrapping
+and insertion.  Many macros (such as @code{ife}, @code{b}, @code{iifd}, etc.
+from @file{dm-c}) are useful for both operations.
+
+@node dmacro-wrap-region,,dmacro-wrap-line,Using Dmacro
+@section dmacro-wrap-region
+
+@findex dmacro-wrap-region
+@cindex wrapping a region
+@kindex C-c r
+This command, normally bound to @kbd{C-c r} is just like
+@code{dmacro-wrap-line} except that it operates on all the text
+between point and mark.  For example, to wrap several lines of C code in
+curly braces using the @code{b} macro defined in @file{dm-c.el}; or
+to apply a macro containing a @TeX{} command to a word or sentence. @refill
+
+Mark-setting commands such as @code{mark-word} (@kbd{@key{ESC} @@}) and
+@code{mark-paragraph} (@kbd{@key{ESC} h}) are useful for specifying the
+to-be-wrapped region (@pxref{Mark,Mark,The Mark and the Region,Emacs,
+GNU Emacs Manual}). @refill
+
+@node Installation,Creating Macros,Using Dmacro,Top
+@chapter Installing Dynamic Macro
+
+This section describes how to make Dmacro a permanent part of your
+Emacs environment.
+
+@enumerate
+@item
+To avoid confusion during installation, unpack Dmacro in a directory not
+on your load-path.
+
+@item
+Look at the values for @code{ELISP_DIR} and @code{INFO_DIR} in the
+Makefile.  Change them so that they point to the correct place in your
+file system.  Then from the Unix shell, type:
+
+@example
+make install
+@end example
+
+@item
+If you're a C programmer, modify @file{demo.dm} to suit your tastes
+(@xref{Creating Macros}, for details.)  Also, rename it to something
+more sensible like @file{coding-standards.dm}.  In your @file{.emacs}
+file, add a command to load each Dmacro file that you plan to use.  For
+example: @refill
+
+@lisp
+(require 'dmacro)
+(dmacro-load "/usr/local/elisp/coding-standards.dm")
+(dmacro-load "~/my-macros.dm")
+@end lisp
+
+@item
+Look at the lines in @file{dm-c.el} which bind keys and set the value of
+@code{auto-mode-alist}.  If you wish, add these or something similar to
+your @file{.emacs} file.
+@end enumerate
+
+@node Creating Macros,Customization,Installation,Top
+@chapter Creating Macros
+
+This section describes two ways of constructing new dynamic macros.  The
+old-fashioned way is to create a Dmacro file by hand.  The alternative
+is Dmacro Builder, which allows you to create macros interactively.
+This section also describes all the built-in Dmacro functions and
+modifiers.  Together these are referred to as Dmacro directives.  They
+are the building blocks from which macros are constructed.
+
+@cindex Dmacro tables
+Dmacros are stored in tables which are associated with one or more major
+mode.  For example, macros for Lisp programs would go in the
+@code{emacs-lisp-mode} table; macros for text would go in the
+@code{text-mode} table.  If you want a macro to be available all the
+time, it should be stored in the default or @code{nil} table.
+
+@menu
+* Dmacro Builder::		Building macros interactively
+* Dmacro Files::		File format
+* Directives::		        Dmacro building blocks
+* Auto Insertion::		Inserting macros into new files automatically
+* Binding Dmacros to Keys::	If you REALLY worry about wasted keystrokes
+@end menu
+
+@node Dmacro Builder,Dmacro Files,,Creating Macros
+@section Dmacro Builder
+
+There are an awful lot of syntax rules and other nastiness to be aware
+of when you are building macros by hand (@pxref{Dmacro Files}).
+Dmacro Builder is designed to take care of all that for you.
+@xref{dont-bind-my-keys,Customization}, for information
+about changing the key bindings described here. @refill
+
+@menu
+* dmacro-build::		begin defining macro
+* dmacro-build-command::	non-text and dynamic text
+* dmacro-build-modifier::	capitalization, substrings, etc.
+* dmacro-save::		store created macros
+@end menu
+
+@node dmacro-build,dmacro-build-command,,Dmacro Builder
+@subsection dmacro-build
+
+@findex dmacro-build
+Invoke this command by typing:
+
+@example
+@kbd{M-x dmacro-build}
+@end example
+
+@noindent
+to begin defining a new mode-specific macro.
+
+To define a global macro, preface the command with an argument:
+
+@example
+@kbd{C-u M-x dmacro-build}
+@end example
+
+You will be prompted for the name of the new macro and its
+documentation string.  If the macro already exists, you will be
+asked if you really want to redefine it.  You will then be advised:
+
+@example
+Build macro. Type C-c C-d to insert directive. ESC C-c when done.
+@end example
+
+Begin typing the text of the new macro.  When you're done, position
+the cursor at the end of the text and type @kbd{M-C-c}.  All the text
+between the cursor's starting location and its current location will be
+used as the new macro definition.  If any line of the text was
+indented, the new macro will automatically indent, as well.  If you
+change your mind, you can abort the macro definition by typing
+@kbd{C-]}.
+
+@node dmacro-build-command,dmacro-build-modifier,dmacro-build,Dmacro Builder
+@subsection dmacro-build-command
+
+@kindex C-c C-d
+@findex dmacro-build-command
+When typing the text of the new macro, you may find that you need
+something more than plain old hard-coded text.  That's where
+@code{dmacro-build-command} comes in.  Normally, this is bound to
+@kbd{C-c C-d}. @refill
+
+You will be prompted for a function name and, where appropriate,
+function arguments.  After you have supplied the required information,
+the text that would result from the directive is inserted in the buffer.
+
+For example, if you invoke the @code{~month} function, the text
+@samp{December} might be inserted.
+@xref{Functions},  for a complete list of Dmacro functions. @refill
+
+@node dmacro-build-modifier,dmacro-save,dmacro-build-command,Dmacro Builder
+@subsection dmacro-build-modifier
+
+@kindex C-c C-m
+@findex dmacro-build-modifier
+When the cursor is positioned on or immediately after the text from a
+directive, you may apply one or more modifiers to it.  Normally,
+this command is bound to @kbd{C-c C-m}.  When you invoke it, you
+will be prompted as follows:
+
+@noindent
+@example
+Modifiers: (U)pper (L)ower (C)aps (P)ad (S)ubstring (E)xpression. Or Return
+@end example
+
+Enter one or more of the indicated letters.  When you're finished hit
+@kbd{@key{RET}}.  The prompt will disappear and the modifiers will be applied to
+the text.
+@xref{Modifiers}, for a complete description of
+the modifiers. @refill
+
+@node dmacro-save,,dmacro-build-modifier,Dmacro Builder
+@subsection dmacro-save
+
+@findex dmacro-save
+After you have defined new macros, type @kbd{M-x dmacro-save @key{RET}
+@var{filename}}.  This will store all currently-defined macros in the
+specified file (which can then be reloaded via @code{dmacro-load}.
+
+@node Dmacro Files,Directives,Dmacro Builder,Creating Macros
+@section Dmacro Files
+
+A Dmacro file is a structured file containing Dmacro definitions.  The
+format of each definition is as follows:
+
+@example
+Name      Expander       Documentation
+Text
+#
+@end example
+
+See below for details on each of these components.
+
+By default, macros are defined in the ``@code{nil}'' table, which means
+they will be available in all buffers regardless of major mode.  To
+restrict macros to one specific mode, preceed them by a control
+statement of the form:
+
+@example
+# MODE: [mode-name...]
+@end example
+
+Multiple modes may be specified on one line.  For example:
+
+@example
+# MODE: c-mode c++-mode
+@end example
+
+says that the definitions following this line apply to both c-mode and
+c++-mode.
+
+If you're not sure of the exact name of a major mode, go to a buffer
+which is in that mode and type @kbd{Control-h v major-mode @key{RET}}.
+
+There is another control statement called @code{# ALIAS}.
+@xref{Defining Aliases}, for details.
+
+Other lines starting with @code{#} are treated as comments and ignored.
+
+The following Dmacro file defines two macros for C-mode:
+
+@example
+#######
+# MODE: c-mode
+#######
+
+# ### First definition ###
+
+d
+#define
+#
+
+# ### Second definition ###
+
+masthead        expand       Banner for the top of a source code file
+/* File: ~(file). Copyright (c) ~(year) BIG Corp. */
+
+#
+@end example
+
+@menu
+* Name::
+* Expander::
+* Documentation::
+* Text::
+* Shortcuts::
+@end menu
+
+@node Name,Expander,,Dmacro Files
+@comment  node-name,  next,  previous,  up
+@subsection Name
+
+This is an Elisp symbol (@samp{d} and @samp{masthead} above.  This is
+what the user will eventually enter at @code{insert-dmacro}'s prompt.
+
+
+@node Expander,Documentation,Name,Dmacro Files
+@subsection Expander
+
+The expander may be omitted (as it was in the first example above).  If
+specified, it's value should be @code{expand} for ordinary macro
+expansion, or @code{indent} which means that in addition to expansion,
+each line of the expanded text will be indented in whatever way is
+appropriate for the current buffer's mode.
+
+@node Documentation,Text,Expander,Dmacro Files
+@subsection Documentation
+
+The optional documentation string is a short description of what this
+Dmacro does.  @xref{insert-dmacro}, for a description of how
+the documentation is accessed by the user.
+
+@node Text,Shortcuts,Documentation,Dmacro Files
+@subsection Text
+
+The text is a string of characters interspersed with Dmacro directives.
+Each directive is prefixed by the tilde character (@samp{~}).  So this
+macro definition:
+
+@example
+test
+I am ~(user-name), and the time is ~(hour):~(min):~(sec).
+#
+@end example
+
+@noindent
+might produce something like this:
+
+@example
+I am Wayne Mesard, and the time is 11:33:20.
+@end example
+
+Several functions take arguments.  For example, the @code{insert-file}
+function takes a file name as an argument.  So a macro definition
+using this function might look like:
+
+@example
+test2
+On ~(day) the file contained:
+----
+~(insert-file "myfile.txt").
+----
+#
+@end example
+
+@noindent
+Remember that the text is terminated by a pound sign (@samp{#}) on a
+line by itself.  If you need such a line in the actual text, preceed
+it with a backslash (@samp{\}).
+
+@node Shortcuts,,Text,Dmacro Files
+@comment  node-name,  next,  previous,  up
+@subsection Shortcuts
+
+If a directive doesn't have any arguments or modifiers (described below)
+The parenthesis are not needed.  In this case, the word immediately
+after the tilde is used as the directive (where ``word'' is anything
+that is considered a word in the current Emacs buffer plus the dash
+(@samp{-}).  So the @code{test}, above, could be rewritten as:
+
+@example
+test
+I am ~user-name, and the time is ~hour:~min:~sec.
+@end example
+
+@node Directives,Auto Insertion,Dmacro Files,Creating Macros
+@section Dmacro Directives
+
+At minimum, a Dmacro directive consists of a function name.  It may
+also include arguments and modifiers.  This section describes these
+parts in more detail.
+
+@menu
+* Functions::		Basic Functions
+* Modifiers::		Tweaking Dmacros while expanding
+@end menu
+
+@node Functions,Modifiers,,Directives
+@subsection Functions
+
+Dynamic Macro functions are the predefined set of routines on which all
+Dynamic Macro directives are built.  Each function returns a string or nil.
+
+@table @code
+@item @@
+Synonym for @code{~point}.  See below.
+
+@item ~
+A single tilde.  Usage: @samp{~~} or @samp{~(~)}.
+
+@item ampm
+@samp{am} if it's before noon, @samp{pm} after noon.
+
+@item chron
+The complete time stamp as a 24 character string.
+Example: @samp{Tue Dec 24 22:59:00 1991}
+
+@item date
+Day of the month as a two digit string (1-31).
+
+@item day
+The three character abbreviation for the day of the week.
+Example: @samp{Tue}.
+
+@item dmacro
+Takes an argument name, which is a symbol corresponding
+to another macro.  The named macro is expanded and inserted.  A
+second, optional argument, pointP, if non-nil, will cause point to be
+left where the inner macro puts it.  (By default, the outer
+macro---the one that the user invoked directly---has control of
+positioning point.)  Usage:
+
+@lisp
+~(dmacro malloc)
+~(dmacro hifdef t)
+@end lisp
+
+If no macro name is currently defined, name itself is inserted.  So
+the following macro text:
+
+@example
+"I play ~(dmacro guitar)."
+@end example
+
+could produce different results for different people.  Someone who
+plays electric guitar could define a new macro in his/her personal
+Dmacro file:
+
+@lisp
+guitar
+electric guitar
+#
+@end lisp
+
+Look at the @code{mal} and @code{ifmal} macros in @file{demo.dm} for a more
+practical example.  (They use this technique with a macro named
+@code{malloc} to allow people to use different malloc functions without
+having to modify the Dmacro file.
+
+@item eval
+Takes a single argument, a Lisp form to be evaluated. This may
+be any valid Elisp form.  The result is converted to a string (if it
+isn't one already).  Usage:
+
+@lisp
+~(eval (system-name))
+~(eval (yow))
+~(eval (mapconcat 'identity
+                  (directory-files "~") "\n"))
+@end lisp
+
+@noindent
+The Lisp form must leave the point where it was.
+
+@item file
+File name without directory.  Example: @samp{myfile.txt}.
+
+@item file-dir
+Directory without file name.  Example: @samp{/home/bbush}.
+
+@item file-ext
+File name extension.  Example: @samp{txt}.
+
+@item file-long
+The complete pathname of the file being edited in the current buffer.
+Example: @samp{/home/bbush/myfile.txt}.
+
+@item file-name
+File name without directory or extension.  Example: @samp{myfile}.
+
+@item hour
+The hour as a two digit string (1-12).
+
+@item hour24
+The hour as a two digit string (0-23).
+
+@item if
+Takes three args.  @var{expression} is a directive.  @var{then} and
+@var{else} can be strings (in double quotes) or directives.
+@var{else} is optional.  If expression returns something other than an
+empty string or nil, @var{then} is evaluated and returned.  Otherwise
+@var{else} is evaluated and returned.  Usage: @refill
+
+@lisp
+~(if (prompt optional-arg) ",")
+~(if (eval (getenv "HOME"))
+    (eval (getenv "HOME")) "unknown!")
+@end lisp
+
+@item insert-file
+Takes a single argument, a string containing the name
+of a file.  Returns the entire contents of that file.
+
+@item mark
+Tells Dmacro to leave a mark at this position.  The user
+can jump between the point and the current mark via C-x
+C-x.  If a macro contains multiple marks, the user can step
+through them via @kbd{C-u C-Space} (or @kbd{C-u C-@@} on
+terminals which don't handle @kbd{C-Space}).  This is useful for
+macros containing complex ``fill in the blank'' forms.  The ``mark
+ring'' is one of the nifty unsung features of Emacs.  You are urged to
+use this function freely (and make sure to tell your users about the
+mark manipulation commands).
+
+@item min
+The minutes as an unpadded two digit string (00-59).
+
+@item mon
+The three character abbreviation of the current month.
+Example: @samp{Dec}.
+
+@item month
+The current month (unabbreviated).  Example: @samp{December}.
+
+@item month-num
+The two digit number for the current month (1-12).
+point   Tells Dmacro to leave the cursor at this position after the
+macro is expanded.  (Returns nil.)
+
+@item prompt
+A user-specified string.  Prompts for the string when the
+macro is expanded.  Takes several arguments, all of which are
+optional.  name is the name of this prompt; it can be any symbol; the
+default is ``your-text''.  prompt-string is the string to display in
+the minibuffer at prompt time; the default is name followed by a
+colon.  prompter is the Elisp function to prompt with; the default is
+read-string; other reasonable choices are functions like read-file-name
+or read-minibuffer.  Any other arguments to ~prompt are passed on to
+the prompter.  
+
+I know that paragraph doesn't make sense.  Please use the examples as a
+guide:
+
+@lisp
+~prompt
+~(prompt datatype "Enter datatype: ")
+~(prompt file-name "Header file name:
+   read-file-name "/usr/include")
+@end lisp
+
+The prompting arguments are only meaningful the first time that a
+particular name appears in each macro.  They are ignored thereafter
+(since a particular prompt can appear multiple times in a macro, but
+it is only prompted for once).
+
+@item sec
+The seconds as an unpadded two digit string (00-59).
+
+@item shell
+Takes a single argument, @var{command}, a shell command to be run.
+Returns the result.  Usage:
+
+@lisp
+~(shell "/usr/games/fortune")
+~(shell "ls *.c")
+@end lisp
+
+Many commands, add a final newline to their output.  To suppress the
+final newline, specify substring modifiers of 0 and -1.  For example:
+
+@lisp
+~((shell "uptime") 0 -1)
+@end lisp
+
+@item user-id
+The current user's login id.  Example: @samp{bbush}.
+
+@item user-initials
+The current user's initials.  Example: @samp{BB}.
+
+@item user-name
+The current user's name.  Example: @samp{Barbara Bush}.
+
+@item year
+The year as a four digit number.
+@end table
+@findex year
+@findex user-name
+@findex user-initials
+@findex user-id
+@findex dmacro
+@findex shell
+@findex sec
+@findex prompt
+@findex month-num
+@findex month
+@findex mon
+@findex min
+@findex insert-file
+@findex if
+@findex hour24
+@findex hour
+@findex file-name
+@findex file-long
+@findex file-ext
+@findex file-dir
+@findex file
+@findex eval
+@findex day
+@findex date
+@findex chron
+@findex ampm
+@findex ~
+@findex @@
+
+@node Modifiers,,Functions,Directives
+@comment  node-name,  next,  previous,  up
+@subsection Modifiers
+
+@cindex modifiers
+Dmacro modifiers are transformations applied to a directive.  This
+section lists the modifiers available and gives several examples of
+their usage.  Modifiers are applied to a directive using the following
+format:
+
+@lisp
+~((function args@dots{}) modifiers@dots{})
+@end lisp
+
+@menu
+* Casification::		Uppercase, lowercase, capitalization
+* Padding::			Dealing with leading whitespace
+* Substrings::			Specifying substrings (by character).
+* Sub-expressions::		Specifying substrings (by word).
+@end menu
+
+@node Casification,Padding,,Modifiers
+@subsubsection Casification
+
+@iftex
+@findex :up
+@findex :down
+@findex :cap
+@end iftex
+@findex up
+@findex down
+@findex cap
+@cindex case modifiers
+The three modifiers, @code{:up,} @code{:down} and @code{:cap} will,
+respectively, convert
+the text to all upper case, all lower case, or capitalize each word.
+So to display the current month in all upper case, you would use the
+directive: @refill
+
+@lisp
+~((month) :up)
+@end lisp
+
+@node Padding,Substrings,Casification,Modifiers
+@subsubsection Padding
+
+@findex pad
+@cindex padding modifier
+If the text contains any leading spaces, the @code{:pad} modifier can be used
+to specify how it should be handled.  For example, the @code{~(hour)} directive
+always produces a two character string.  Before 10 o'clock the first
+character is a space.  To replace the space with a zero, you would say:
+
+@lisp
+~((hour) :pad ?0)
+@end lisp
+
+Notice the question mark @samp{?}.  The @code{:pad} token must be
+followed by the character to use as a pad.  The question mark is Emacs'
+way of saying it is ``the character zero'' as opposed to ``the number
+zero.''  @code{:pad} may also be followed by @code{nil}.  This means
+don't pad at all.  So: @refill
+
+@lisp
+~((hour) :pad nil)
+@end lisp
+
+@noindent
+would return a one character string before 10 o'clock. @refill
+
+@node Substrings,Sub-expressions,Padding,Modifiers
+@subsubsection Substrings
+
+@cindex substrings
+You may only be interested in a portion of the string returned by a
+directive.  To return a part of the string, specify the position of
+characters in which you are interested.  If you specify a negative
+number, Dmacro counts from the end of the string.  For example:
+
+@example
+~((user-id) 0 2)      ==> wm
+~((user-id) 2)        ==> esard
+~((user-id) -5)       ==> esard
+@end example
+
+The behavior is the same as the Elisp function substring, except that
+the original string is returned if there's an error.  For example:
+
+@example
+~((user-id) 150 200)  ==> wmesard
+@end example
+
+
+@node Sub-expressions,,Substrings,Modifiers
+@subsubsection Sub-expressions
+
+@findex sexp
+@cindex sub-expressions
+If you specify the @code{:sexp} modifier, Dmacro will return sub-expressions
+instead of a substring of the original text.  (An expression is a
+balanced Elisp expression, i.e., a string, token or list.)  For
+example, to get the user's first name only, you would say:
+
+@example
+~((user-name) :sexp 0 0)
+@end example
+
+@noindent
+To get the last name only, say:
+
+@example
+~((user-name) :sexp -1)
+@end example
+
+@node Auto Insertion,Binding Dmacros to Keys,Directives,Creating Macros
+@section Auto-Insertion of Dmacros
+
+@vindex auto-dmacro-alist
+The Dmacro package can automatically insert a macro whenever you
+create a new file.  This behavior is controlled by the variable
+@code{auto-dmacro-alist}.  Its format is similar to Emacs'
+@code{auto-mode-alist} (@pxref{Choosing Modes,,Choosing Modes,Emacs,The
+GNU Emacs Manual}).  Each element in the list is a dotted pair
+containing a regular expression describing a filename and a macro
+name. @refill
+
+@cindex masthead
+@cindex automatic macro insertion
+For example, if you defined a macro named @code{masthead} that you want
+to automatically insert whenever you create a new @file{.c} or @file{.h}
+file, and a macro named @code{manskeleton} that you want inserted
+whenever you create a new @file{.man} file, you would put the following in
+your @file{.emacs} file:
+
+@lisp
+(setq auto-dmacro-alist (append '(("\\.[ch]$" . masthead)
+                                  ("\\.man$" . manskeleton))
+                                auto-dmacro-alist))
+@end lisp
+
+If the named macro isn't defined for the current major mode, then no
+action is taken.  Since many macro sets have adopted the convention of
+naming to-be-auto-inserted macros @code{masthead}, the default value of
+@code{auto-dmacro-alist} is:
+
+@lisp
+(("." . masthead))
+@end lisp
+
+@noindent
+(which means that the first element in the example above is not necessary).
+
+
+@node Binding Dmacros to Keys,,Auto Insertion,Creating Macros
+@section Binding Dmacros to Keys
+
+@findex dmacro-command
+The function @code{dmacro-command} makes it possible to turn dmacros
+into full-fledged Emacs commands.  These, in turn, can be bound to keys.
+(Die-hard Emacs users like to have everything key bindings for
+everything.)
+
+@code{dmacro-command} takes three arguments: @var{dmacro1},
+@var{dmacro2} and @var{command-name}. @var{dmacro2} and
+@var{command-name} are optional. @refill
+
+@code{dmacro-command} builds an Emacs command which invokes the
+macro named by the first argument.  If @var{dmacro2} is specified,
+it will be inserted when the command is given a prefix argument.  If
+@var{command-name} is specified, the resulting Emacs command will be
+given that name (otherwise the command is anonymous).  The following
+examples illustrate how this works:
+
+@lisp
+(define-key c-mode-map "\C-cm" (dmacro-command "mal"))
+(global-set-key        "\C-ct" (dmacro-command "dstamp" "dtstamp"))
+(define-key c-mode-map "\C-cf" (dmacro-command "for" nil 'c-insert-for))
+@end lisp
+
+@noindent
+The first command binds the @code{mal} macro to @kbd{C-c m} when
+editing C files.  The second example binds the @code{dstamp} macro to
+@kbd{C-c d} and the @code{dtstamp} macro to @kbd{C-u C-c d}.  The
+final example binds a macro named @code{for} to @kbd{C-c f} and creates
+a real live Emacs command called @code{c-insert-for,} suitable for use with
+@kbd{C-h f} and @kbd{M-x}. @refill
+
+@node Customization,Defining New Directives,Creating Macros,Top
+@chapter Customizing Dmacro
+
+This section describes user-settable variables which customize
+Dmacro's behavior.  They can be set using the @code{setq} function in your
+@file{.emacs} file.  Alternatively, you can use
+@kbd{M-x set-variable} or @kbd{M-x edit-options} to change their values
+interactively.
+
+Use @kbd{C-h v} to find out the current setting of these options.
+@xref{Examining,,Examining and Setting Variables,Emacs,GNU Emacs Manual},
+for information on these variable manipulation commands.
+
+@menu
+* Interface Options::
+* Expansion Options::
+@end menu
+
+@node Interface Options,Expansion Options,,Customization
+@comment  node-name,  next,  previous,  up
+@section Interface Options
+
+@menu
+* dont-bind-my-keys::
+* dmacro-prompt::
+@end menu
+
+@node dont-bind-my-keys,dmacro-prompt,,Interface Options
+@subsection dont-bind-my-keys
+
+@vindex dont-bind-my-keys
+Dmacro and Dmacro Builder automatically bind certain functions to
+keys.  To prevent this, set @code{dont-bind-my-keys} to @code{t} before
+loading these programs.  This is useful if you want to bind the
+functions to different keys or if you simply don't want Dmacro messing
+with your key mappings.
+
+By default, this variable is unbound (which tells Dmacro to do the
+bindings).
+
+@node dmacro-prompt,,dont-bind-my-keys,Interface Options
+@comment  node-name,  next,  previous,  up
+@subsection dmacro-prompt
+
+@vindex dmacro-prompt
+One of Dmacro's most important features is its ability get a string
+from the user at expansion time.  There are three modes in for doing
+this: prompting mode, post-expansion mode and pre-expansion mode.
+
+In prompting mode the user is prompted in the minibuffer for each
+string.  This is the default (and recommended) mode.  To select it set
+@code{dmacro-prompt} to @code{t}.
+
+@cindex post-expansion
+In post-expansion mode, no prompting is done, instead the macro is
+inserted with placeholders (surrounded by angle-brackets).  For example:
+
+@example
+for (i = <var>; <var> > 0; --<var>)
+@end example
+
+@findex dmacro-fill-in-blanks
+@kindex C-c f
+Then to complete the macro, the user types balanced expressions into
+the buffer (one for each unique placeholder) and invokes the command
+@code{dmacro-fill-in-blanks,} which is normally bound to @kbd{C-c f}.
+The expressions are deleted and then reinserted at each placeholder.
+This can be done any time before the next macro is inserted (in other
+words, Dmacro only remembers the most recent set of placeholders).  To
+select post-expansion mode set dmacro-prompt to nil.
+
+@cindex pre-expansion
+In pre-expansion mode, the user must type the balanced expressions
+before inserting the macro.  The appropriate number of expressions
+will be deleted from the buffer and inserted into the macro.  To
+select this mode, set @code{dmacro-prompt} to something other than
+@code{t} or @code{nil}.
+
+Pre- and post-expansion mode are provided for people who hate typing in
+the minibuffer.  Keep in mind, however, that if you forget to type the
+right number of balanced expressions, Dmacro will blindly use---and
+delete---whatever it finds in the buffer.  Use at your own risk.  Also,
+if the expression is a string, it will be inserted without the quotes.
+So multi-word entries can be specified by wrapping quotes around them.
+
+@node Expansion Options,,Interface Options,Customization
+@section Expansion Options
+
+@menu
+* dmacro-month-names::
+* dmacro-prefix-char::
+* dmacro-rank-in-initials::
+@end menu
+
+@node dmacro-month-names,dmacro-prefix-char,, Expansion Options
+@subsection dmacro-month-names
+
+@vindex dmacro-month-names
+This variable contains a list of the names of the 12 months.  The
+@code{~month} function uses this list.  Change these to suit your language or
+your tastes.
+
+The default value is:
+
+@lisp
+("January" "February" "March" "April" "May" "June" "July"
+ "August" "September" "October" "November" "December")
+@end lisp
+
+@node dmacro-prefix-char,dmacro-rank-in-initials,dmacro-month-names, Expansion Options
+@subsection dmacro-prefix-char
+
+@vindex dmacro-prefix-char
+By default, Dmacro uses a tilde (@samp{~}) to mark the start of a
+directive within the macro text.  If, for some bizarre reason, you want
+to use another character, set this variable.  It must be a string
+containing a single character.
+
+@node dmacro-rank-in-initials,,dmacro-prefix-char,Expansion Options
+@subsection dmacro-rank-in-initials
+
+@vindex dmacro-rank-in-initials
+When the @code{~(user-initials)} function sees a rank (that is,
+@samp{Jr}, @samp{Sr}, @samp{II}, @samp{III}, etc.) in a user's name, it
+normally ignores it.  If this variable is non-nil, it will include it as
+is.  For example, Pope John Paul II would normally have the initials
+@samp{PJP}.  If he set this variable to non-nil, his initials would
+change to @samp{PJPII}. @refill
+
+@node Defining New Directives,Release Notes,Customization,Top
+@chapter Defining New Directives
+
+This section describes how to create new Dmacro directives.  If the
+existing set of functions is not sufficient for your needs, you can
+add to it.  Dmacro Builder will also recognize these newly-defined
+directives.
+
+There are two types of directives: functions and aliases.  From the
+macro builder's point of view they both behave the same.  However, the
+way they are defined is very different.
+
+@menu
+* Defining Aliases::
+* Defining Functions::
+@end menu
+
+@node Defining Aliases,Defining Functions,,Defining New Directives
+@comment  node-name,  next,  previous,  up
+@section Defining Aliases
+
+@findex def-dmacro-alias
+@cindex aliases
+
+Aliases are synonyms for complicated and/or commonly used dmacro
+directives.  They make the text section of a dmacro easier to read.
+The simplest way to define them is to place the @code{# ALIAS:} control
+statement in the file in which the alias is used.  Some examples:
+
+@example
+# The ~@@ function is a synonym for ~point. It could have been defined like:
+# ALIAS: @@ (point)
+
+# The last 2 digits of the year.
+# ALIAS: year2  ((year) 2))
+
+# Prompt for header file name.
+# ALIAS: hfileprompt (prompt header-file "Header file name:" 
+        read-file-name "/usr/include")
+@end example
+
+Note that the alias body is always a single S-expression and can,
+therefore, span multiple lines.
+
+Alternatively, you can define aliases in an Elisp file by calling
+@code{def-dmacro-alias}.  The previous examples would look like:
+
+@lisp
+;; The ~@@ function is a synonym for ~point. It could have been defined like:
+(def-dmacro-alias @@ point)
+
+;; The last 2 digits of the year.
+(def-dmacro-alias year2  ((year) 2))
+
+;; Prompt for header file name.
+(def-dmacro-alias hfileprompt
+  (prompt header-file "Header file name:" read-file-name "/usr/include"))
+@end lisp
+
+@node Defining Functions,,Defining Aliases,Defining New Directives
+@section Defining Functions
+
+@findex def-dmacro-function
+@findex eval
+The @code{~eval} function can be inconvenient if your macros contain
+complex or frequently-used Elisp expressions.  In this case, you may want
+to create a new Dmacro function.  You are responsible for ensuring that
+your functions always return a string or nil, and that they always leave
+the point where they found it.
+
+@code{def-dmacro-function} comes in two flavors:
+
+@lisp
+(def-dmacro-function @var{macro-name} @var{Elisp-function})
+@end lisp
+
+For example, to define a function named @code{~env} which does the same
+thing as the Elisp function @code{getenv}, you would say:
+
+@lisp
+(def-dmacro-function env getenv)
+@end lisp
+
+Since the Elisp function takes one string argument, the new function does,
+too.  So this could be used in macro text as follows:
+@example
+My terminal type is ~(env "TERM"), isn't that interesting?
+@end example
+
+The second format is exactly like Emacs Lisp's @code{defun}:
+
+@lisp
+(def-dmacro-function @var{macro-name} (@var{args}@dots{}) @var{body}@dots{})
+@end lisp
+
+For example, the ~ampm function could have been defined like this:
+
+@lisp
+(def-dmacro-function ampm ()
+  (if (<= 12 (string-to-int (substring (current-time-string) 11 13)))
+      "pm"
+    "am"))
+@end lisp
+
+@node Release Notes,Glossary,Defining New Directives,Top
+@chapter Release Notes
+
+@itemize @bullet        
+@item
+Fixed bug from version 2.4 which causes # MODE:'s to prepend to the mode
+list instead of resetting it (this caused the wrong macro to be used if
+macros with the same name are used in different modes).
+
+@item
+Fixed bugs introduced in version 2.3.
+
+@item
+Got rid of the dmacro-share-mode stuff.  Now specifying multiple modes
+in a "# MODE:" line creates a copy of the dmacros in each table.
+
+This was a frequent enhancement request for people who wanted to
+have a c++-mode table, a c-mode table, and a table common to
+both modes (but didn't want to use the global table for this
+purpose).
+@item
+Don't use symbol-plist to store the data for dmacro-process-strings.
+Lucid Emacs builds plists in the opposite order of GNU Emacs, so the
+user gets prompted last item first.  No good.
+@item
+Get rid of the prompt-old-values stuff.  (It broke old dmacros because
+it assumed a "read-from-minibuffer"-style arglist instead of the
+previous read-string style.)  Replaced with a private history list which
+is arguably a better solution, anyway.
+@item
+Fix bug in dmacro-initials for people with I, V or X in their last
+names!  Thanks to (mic@@cs.ucsd.edu (Michelangelo Grigni)).
+@end itemize
+
+@node Glossary,Key Index,Release Notes,Top
+@comment  node-name,  next,  previous,  up
+@chapter Glossary
+
+@table @asis
+@item alias
+A symbol corresponding to a shorthand notation for a directive.
+
+@item directive
+A function or alias, arguments (if required) and optional modifiers.
+Examples:
+
+@example
+ampm
+(prompt data-type)
+((user-id) :cap)
+@end example
+
+@item Dmacro file
+A text file containing alias and macro definitions.
+
+@item Elisp
+The Emacs Lisp programming language.  This is the language programmers
+use to customize and extend GNU Emacs.  Your @code{.emacs} file contains
+Elisp code.  Dmacro is written in Elisp.
+
+@item expression
+@itemx balanced expression
+An Elisp S-expression.  This can be a symbol, list, string, etc.
+Examples:
+
+@example
+foobar2
+my-dog-has-fleas
+underscores_count
+(and lists (and lists of lists))
+"and strings, of course"
+@end example
+
+@item function
+An actual piece of Emacs Lisp code.  In the context of Dmacro, this is
+something defined by @code{def-dmacro-function} and must return a string
+or nil.
+
+@item modifier
+A transformation applied to the string returned by a directive.
+Modifiers are used to change the case of a string, affect the
+left-padding of a string or extract a portion of the string.
+@end table
+
+@node Key Index, Function and Variable Index,Glossary,Top
+@unnumbered Key Index
+
+@printindex ky
+
+@node Function and Variable Index,Concept Index,Key Index,Top
+@unnumbered Function and Variable Index
+
+@printindex fn
+
+@node Concept Index,,Function and Variable Index,Top
+@unnumbered Concept Index
+
+@printindex cp
+
+@contents
+@bye

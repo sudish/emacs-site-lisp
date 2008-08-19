@@ -1,0 +1,57 @@
+			     Dynamic Macro
+			     ------- -----
+Dynamic Macro is a program for inserting structured text in Emacs.  In
+addition to straight textual substitution (already available through
+Emacs' Abbrev mode) Dmacro will insert time- and date-stamps, your name
+and user-id, the current file name, a file's contents, the results of a
+shell command and anything else you can think of.  It can prompt the
+user for strings.  It can also position the cursor within the expanded
+text, and indent the expansion in whatever way is appropriate to the
+current major mode.  Dmacro will also allow you to bind macros to keys
+and automatically insert macros in new files.
+
+A development team can use a common macro table with standardized
+comment block and code macros as a way of enforcing a coding standard.
+
+You can insert blocks of text like these:
+
+   -------------------------------     -------------------------------
+   NAME                                for (var = 0; var < p; ++var)
+     myfile.c                          {
+   NOTES                                 m
+                                       } /* for */
+   HISTORY
+     WMesard - 12/24/91: Created.
+   -------------------------------     -------------------------------
+   where the user, file and date       where "p" and "m" indicate the position
+   info are automatically filled       of the point and mark, and "var" is
+   in at insertion time.               supplied by the user in the minibuffer.
+
+CONTENTS:
+--------
+   README             This file
+   dmacro.el          The Dmacro program
+   dmacro-bld.el      A tool for creating new dmacros interactively
+   dmacro-sv.el       I/O routines (autoloaded by dmacro.el)
+   dm-c.el            An online tutorial (see the user's manual)
+   demo.dm            Macros used by the online tutorial
+   elisp.dm           Some useless dmacros for Emacs Lisp programmers
+   fortran.dm         Larry Dodd's excellent set of Fortran dmacros
+   dm-compat.el       Backwards compatability code and IMPORTANT information
+                      for Dmacro 2.0 users
+   dmacro.texinfo     User's manual in TexInfo format
+   Makefile           Compiling, installing, printing the manual
+
+INSTALLATION
+------------
+Unpack Dmacro in a directory not on your load-path (to avoid confusion
+during installation).  Change the two directory names at the top of
+Makefile as appropriate, then from the shell prompt, type:
+
+	make install
+
+To prepare a hardcopy version of the user's manual type:
+
+	make tree-killer
+
+See dm-c.el for an idea of what to add to your ~/.emacs file.
