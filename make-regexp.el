@@ -1,15 +1,15 @@
 ;;; make-regexp.el --- generate efficient regexps to match strings.
 
-;; Copyright (C) 1994 Simon Marshall.
+;; Copyright (C) 1994, 1995 Simon Marshall.
 
-;; Author: Simon Marshall <Simon.Marshall@mail.esrin.esa.it>
-;; Keywords: string, regexp
-;; Version: 1.00
+;; Author: Simon Marshall <simon@gnu.ai.mit.edu>
+;; Keywords: strings, regexps
+;; Version: 1.02
 
 ;; LCD Archive Entry:
-;; make-regexp|Simon Marshall|Simon.Marshall@mail.esrin.esa.it|
+;; make-regexp|Simon Marshall|simon@gnu.ai.mit.edu|
 ;; Generate efficient regexps to match strings.|
-;; 25-Jul-94|1.00|~/functions/make-regexp.el.Z|
+;; 11-Jul-1995|1.02|~/functions/make-regexp.el.gz|
 
 ;; The archive is archive.cis.ohio-state.edu in /pub/gnu/emacs/elisp-archive.
 
@@ -76,6 +76,9 @@
 ;; (autoload 'make-regexp "make-regexp"
 ;;   "Return a regexp to match a string item in STRINGS.")
 ;;
+;; (autoload 'make-regexps "make-regexp"
+;;   "Return a regexp to REGEXPS.")
+;;
 ;; Since these functions were written to produce efficient regexps, not regexps
 ;; efficiently, it is probably not a good idea to in-line too many calls in
 ;; your code, unless you use the following neat trick with `eval-when-compile':
@@ -98,10 +101,18 @@
 ;; already.  But (ideas or) code to improve things (are) is welcome.  Please
 ;; test your code and tell me the speed up in searching an appropriate buffer.
 ;;
-;; Please send me bug reports, bug fixes, and extensions, so that I can
-;; merge them into the master source.
-;;     - Simon Marshall (Simon.Marshall@mail.esrin.esa.it)
-
+;; Please send me bug reports, bug fixes, and extensions, etc.
+;; Simon Marshall <simon@gnu.ai.mit.edu>
+
+;; History:
+;;
+;; 1.00--1.01:
+;; - Made `make-regexp' take `lax' to force top-level parentheses.
+;; - Fixed `make-regexps' for MATCH bug and new `font-lock-keywords'.
+;; - Added `unfontify' to user timing functions.
+;; 1.01--1.02:
+;; - Made `make-regexp' `let' a big `max-lisp-eval-depth'.
+
 ;; The basic idea is to find the shortest common non-"" prefix each time, and
 ;; squirrel it out.  If there is no such prefix, we divide the list into two so
 ;; that (at least) one half will have at least a one-character common prefix.
@@ -110,36 +121,38 @@
 ;; (until we're sure we need them), and (b) try to squirrel out one-character
 ;; sequences (so we can use [] rather than ()).
 
-(defun make-regexp (strings &optional paren)
+(defun make-regexp (strings &optional paren lax)
   "Return a regexp to match a string item in STRINGS.
-If optional PAREN non-nil, output regexp parenthesis around returned regexp.
+If optional PAREN non-nil, output regexp parentheses around returned regexp.
+If optional LAX non-nil, don't output parentheses if it doesn't require them.
 Merges keywords to avoid backtracking in Emacs' regexp matcher."
-  (let ((strings (let ((l strings))	; Paranoia---make strings unique!
-		   (while l (setq l (setcdr l (delete (car l) (cdr l)))))
-		   (sort strings 'string-lessp)))
-	(open-paren (if paren "\\(" "")) (close-paren (if paren "\\)" ""))
-	(completion-ignore-case nil))
+  (let* ((max-lisp-eval-depth (* 1024 1024))
+	 (strings (let ((l strings))	; Paranoia---make strings unique!
+		    (while l (setq l (setcdr l (delete (car l) (cdr l)))))
+		    (sort strings 'string-lessp)))
+	 (open-paren (if paren "\\(" "")) (close-paren (if paren "\\)" ""))
+	 (open-lax (if lax "" open-paren)) (close-lax (if lax "" close-paren))
+	 (completion-ignore-case nil))
     (cond
      ;; If there's only one string, just return it.
      ((= (length strings) 1)
-      (car strings))
+      (concat open-lax (car strings) close-lax))
      ;; If there's an empty string, pull it out.
      ((string= (car strings) "")
       (if (and (= (length strings) 2) (= (length (nth 1 strings)) 1))
-	  (concat (nth 1 strings) "?")
+	  (concat open-lax (nth 1 strings) "?" close-lax)
 	(concat open-paren "\\|" (make-regexp (cdr strings)) close-paren)))
      ;; If there are only one-character strings, make a [] list instead.
      ((= (length strings) (apply '+ (mapcar 'length strings)))
-      (concat "[" (mapconcat 'identity strings "") "]"))
+      (concat open-lax "[" (mapconcat 'identity strings "") "]" close-lax))
      (t
       ;; We have a list of strings.  Is there a common prefix?
       (let ((prefix (try-completion "" (mapcar 'list strings))))
 	(if (> (length prefix) 0)
 	    ;; Common prefix!  Squirrel it out and recurse with the suffixes.
 	    (let* ((len (length prefix))
-		   (suffixes (mapcar '(lambda (str) (substring str len))
-				     strings)))
-	      (concat open-paren prefix (make-regexp suffixes t) close-paren))
+		   (sufs (mapcar '(lambda (str) (substring str len)) strings)))
+	      (concat open-paren prefix (make-regexp sufs t t) close-paren))
 	  ;; No common prefix.  Is there a one-character sequence?
 	  (let ((letters (let ((completion-regexp-list '("^.$")))
 			   (all-completions "" (mapcar 'list strings)))))
@@ -159,7 +172,7 @@ Merges keywords to avoid backtracking in Emacs' regexp matcher."
 		(concat open-paren
 			(make-regexp half1) "\\|" (make-regexp half2)
 			close-paren))))))))))
-
+
 ;; This stuff is realy for font-lock...
 
 ;; Ahhh, the wonders of lisp...
@@ -176,24 +189,26 @@ This means the number of \"\\\\(...\\\\)\" pairs in REGEXP, optionally from STAR
 Each item of REGEXPS should be of the form:
 
  STRING                                 ; A STRING to be used literally.
- (STRING MATCH FACE KEEP)               ; Match STRING at depth MATCH with FACE
-                                        ; and highlight according to KEEP.
- (STRINGS FACE KEEP)                    ; STRINGS is a list of strings FACE is
-                                        ; to highlight according to KEEP.
+ (STRING MATCH FACE DATA)               ; Match STRING at depth MATCH with FACE
+                                        ; and highlight according to DATA.
+ (STRINGS FACE DATA)                    ; STRINGS is a list of strings FACE is
+                                        ; to highlight according to DATA.
 
 Returns a list of the form:
 
- (REGEXP (MATCH FACE KEEP) ...)
+ (REGEXP (MATCH FACE DATA) ...)
 
 For example:
 
  (make-regexps \"^(\"
-               '((\"defvar\" \"defun\") keyword)
-               \"[ \\t]+\"
-               '((\"[a-zA-Z-]+\") function))
+               '((\"defun\" \"defalias\" \"defsubst\" \"defadvice\") keyword)
+               \"[ \t]*\"
+               '(\"\\\\([a-zA-Z-]+\\\\)?\" 1 function-name nil t))
+
      =>
 
- (\"^(\\\\(def\\\\(var\\\\|un\\\\)\\\\)[ 	]+\\\\([a-zA-Z-]+\\\\)\" (1 keyword) (3 function))
+ (\"^(\\\\(def\\\\(a\\\\(dvice\\\\|lias\\\\)\\\\|subst\\\\|un\\\\)\\\\)[ 	]*\\\\([a-zA-Z-]+\\\\)?\"
+  (1 keyword) (4 function-name nil t))
 
 Uses `make-regexp' to make efficient regexps."
   (let ((regexp "") (data ()))
@@ -202,7 +217,7 @@ Uses `make-regexp' to make efficient regexps."
 	     (setq regexp (concat regexp (car regexps))))
 	    ((stringp (nth 0 (car regexps)))
 	     (setq data (cons (cons (+ (regexp-span regexp)
-				       (nth 1 (car regexps)) 1)
+				       (nth 1 (car regexps)))
 				    (nthcdr 2 (car regexps)))
 			      data)
 		   regexp (concat regexp (nth 0 (car regexps)))))
@@ -214,55 +229,8 @@ Uses `make-regexp' to make efficient regexps."
 						      t)))))
       (setq regexps (cdr regexps)))
     (cons regexp (nreverse data))))
-
-;; Crude-rude timing...
 
-(defsubst time-seconds (&optional time)
-  "Return the TIME in seconds, or the current time if not given.
-TIME should be the same format as produced by `current-time'."
-  (let ((time (or time (current-time))))
-    (+ (* (nth 0 time) 65536.0) (nth 1 time) (/ (nth 2 time) 1000000.0))))
+;; timing functions removed due to name collisions with Gnus
 
-(defsubst time-since (time)
-  "Return the time in seconds since TIME.
-TIME should be the value of `current-time' or `time-seconds'."
-  (- (time-seconds) (if (floatp time) time (time-seconds time))))
-
-(defun time-function (func &rest args)
-  "Return the time in seconds taken to execute FUNC with ARGS.
-Returned is actually the cons pair (func-value . time)."
-  (garbage-collect)
-  (let ((start (time-seconds)))
-    (cons (apply func args) (time-since start))))
-
-(defun time-regexps (regexps &optional buffer)
-  "Return corresponding list of times to fontify using REGEXPS.
-Fontify using BUFFER, if non-nil."
-  (save-excursion
-    (and buffer (set-buffer buffer))
-    (let ((beg (point-min)) (end (point-max)))
-      (font-lock-unfontify-region beg end)
-      (mapcar (function (lambda (regexp)
-	       (let ((font-lock-keywords (list regexp)))
-		 (cons (cdr (time-function 'font-lock-hack-keywords beg end))
-		       regexp))))
-	      regexps))))
-
-(defun time-fontification (&optional buffer)
-  "Return time to fontify syntactically."
-  (save-excursion
-    (and buffer (set-buffer buffer))
-    (let ((beg (point-min)) (end (point-max)))
-      (font-lock-unfontify-region beg end)
-      (cdr (time-function 'font-lock-fontify-region beg end)))))
-
-(defun sort-font-lock-fontification (regexps &optional buffer)
-  "Return sorted times to fontify syntactically and using REGEXPS."
-  (let ((times (time-regexps regexps buffer)))
-    (nreverse
-     (sort (append (list (list (time-fontification buffer) 'syntactic)
-			 (list (apply '+ (mapcar 'car times)) 'regexps))
-		   times)
-	   'car-less-than-car))))
-
+(provide 'make-regexp)
 ;;; make-regexp.el ends here
