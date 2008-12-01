@@ -1,9 +1,9 @@
 ;;;_* outdent.el - Indentation-based outline exposure and maneuvering
 
 ;; Author: Ken Manheimer <klm@nist.gov>
-;; Maintainer: Ken Manheimer <klm@nist.gov>
+;; Maintainer: Ken Manheimer <klm@i.am>
 ;; Created: Sep 1994 - adapted from my allout.el
-;; Version: $Id: outdent.el,v 1.10 1996/09/19 18:46:13 klm Exp klm $
+;; Version: $Id: outdent.el 4054 2001-08-30 19:05:28Z barry $
 ;; Keywords: outline mode wp languages text
 
 ;;;_* This file is part of GNU Emacs.
@@ -24,17 +24,13 @@
 
 ;;;_* Commentary:
 
-;; A quick-and-dirty adaptation of allout.el which provides outline
-;; exposure control and maneuvering according entirely to text
-;; indentation, rather than character-sequence cues.  Particularly
-;; intended as a prototype for outline-structured editing of
-;; block-structured program code (in which context, comments are
-;; ignored wrt outline structuring).
+;; A casual adaptation of allout.el to provide outline exposure
+;; control and maneuvering according entirely to text indentation.
+;; This is particularly for outline-structured editing of
+;; block-structured program code.
 
-;;Ken Manheimer		klm@cnri.reston.va.us	      703 620-8990 x268
-;;	    (orporation for National Research |nitiatives
-;;		 1895 Preston White Drive, Suite 100
-;;			   Reston, VA 22091
+;; Ken Manheimer
+;; klm@i.am
 
 ;;;_* Provide
 (provide 'outdent)
@@ -188,7 +184,7 @@ leader', which see.")
 ;;;_ #1 Internal Outline Formatting and Configuration
 ;;;_  = outdent-version
 (defvar outdent-version
-  (let ((rcs-rev "$Revision: 1.10 $"))
+  (let ((rcs-rev "$Revision: 4054 $"))
     (condition-case err
 	(save-match-data
 	  (string-match "\\$Revision: \\([0-9]+\\.[0-9]+\\)" rcs-rev)
@@ -494,7 +490,7 @@ the following two lines in your emacs init file:
 ;;;_  > outdent-mode (&optional toggle)
 ;;;_   : Defun:
 (defun outdent-mode (&optional toggle)
-;;;_    . Doc string:
+;;;_    #1 Doc string:
   "Toggle minor mode for exposure and editing of text-indentation outlines.
 
 Optional arg forces mode reactivation iff arg is positive num or symbol.
@@ -518,7 +514,7 @@ C-c C-f outdent-forward-current-level    | C-c C-o outdent-show-current-entry
 C-c C-b outdent-backward-current-level   | ^U C-c C-s outdent-show-all
 C-c C-e outdent-end-of-current-entry     |	   outdent-hide-current-leaves
 C-c C-a outdent-beginning-of-current-entry, alternately, goes to hot-spot"
-;;;_    . Code
+;;;_    #2 Code
   (interactive "P")
 
   (let* ((active (and (not (equal major-mode 'outline))
@@ -581,11 +577,13 @@ C-c C-a outdent-beginning-of-current-entry, alternately, goes to hot-spot"
 	   (outdent-resumptions 'outdent-prior-bindings)))
 
       (outdent-resumptions 'selective-display)
+      (add-hook 'pre-command-hook 'outdent-pre-command-business)
+      (add-hook 'post-command-hook 'outdent-post-command-business)
       (setq local-write-file-hooks
 	   (delq 'outdent-write-file-hook
 		 local-write-file-hooks))
-      (outdent-resumptions 'paragraph-start)
-      (outdent-resumptions 'paragraph-separate)
+;;      (outdent-resumptions 'paragraph-start)
+;;      (outdent-resumptions 'paragraph-separate)
       (outdent-resumptions (if (string-match "^18" emacs-version)
 			      'auto-fill-hook
 			    'auto-fill-function))
@@ -652,15 +650,16 @@ C-c C-a outdent-beginning-of-current-entry, alternately, goes to hot-spot"
 	(outdent-resumptions 'outdent-former-auto-filler (list fill-func))
 	;; Register outdent-auto-fill to be used if filling is active:
 	(outdent-resumptions fill-func-var '(outdent-auto-fill)))
-      ;; Paragraphs are broken by topic headlines.
-      (make-local-variable 'paragraph-start)
-      (outdent-resumptions 'paragraph-start
-			  (list (concat paragraph-start "\\|^\\("
-					outdent-regexp "\\)")))
-      (make-local-variable 'paragraph-separate)
-      (outdent-resumptions 'paragraph-separate
-			  (list (concat paragraph-separate "\\|^\\("
-					outdent-regexp "\\)")))
+;; No, paragraphs are regular according to mode ("indented-text rules":-).
+;;      ;; Paragraphs are broken by topic headlines.
+;;      (make-local-variable 'paragraph-start)
+;;      (outdent-resumptions 'paragraph-start
+;;			  (list (concat paragraph-start "\\|^\\("
+;;					outdent-regexp "\\)")))
+;;      (make-local-variable 'paragraph-separate)
+;;      (outdent-resumptions 'paragraph-separate
+;;			  (list (concat paragraph-separate "\\|^\\("
+;;					outdent-regexp "\\)")))
 
       (or (assq 'outdent-mode minor-mode-alist)
 	  (setq minor-mode-alist
@@ -2075,6 +2074,9 @@ actual quits."
 (defvar outdent-former-auto-filler nil
   "Name of modal fill function being wrapped by outdent-auto-fill.")
 ;;;_    > outdent-shift-in (&optional levels)
+(defun outdent-current-bullet-pos ()
+  outdent-recent-prefix-end)
+
 (defun outdent-shift-in (&optional levels)
 
   "Increase indentation of current topic and offspring.
@@ -2418,14 +2420,9 @@ Note that refill of indented paragraphs is not done."
 
 Leaves primary topic's trailing vertical whitespace, if any."
 
-  ;; Some finagling is done to make complex topic kills appear faster
-  ;; than they actually are.  A redisplay is performed immediately
-  ;; after the region is disposed of, though the renumbering process
-  ;; has yet to be performed.  This means that there may appear to be
-  ;; a lag *after* the kill has been performed.
-
   (interactive)
-  (let* ((beg (prog1 (outdent-back-to-current-heading)(beginning-of-line)))
+  (let* ((beg (progn
+                (outdent-back-to-current-heading) (beginning-of-line) (point)))
          (depth (outdent-recent-indent)))
     (outdent-end-of-current-subtree)
     (if (not (eobp))
@@ -2439,8 +2436,7 @@ Leaves primary topic's trailing vertical whitespace, if any."
 		       (>= (outdent-recent-indent) depth))))
 	    (forward-char 1)))
 	
-    (kill-region beg (point))
-    (sit-for 0)))
+    (kill-region beg (point))))
 ;;;_    > outdent-yank-processing () - this is not yet reconciled
 (defun outdent-yank-processing (&optional arg)
 
