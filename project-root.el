@@ -290,11 +290,12 @@ current-directory."
 if not found. If `project-root' isn't defined then try and find
 one."
   (declare (indent 2))
-  (unless project-details (project-root-fetch))
-  `(if (project-root-p)
-       (let ((default-directory ,(cdr project-details)))
-         ,@body)
-       (error "No project root found")))
+  `(progn
+     (unless project-details (project-root-fetch))
+     (if (project-root-p)
+	 (let ((default-directory (cdr project-details)))
+	   ,@body)
+       (error "No project root found"))))
 
 (defun project-root-goto-root ()
   "Open up the project root in dired."
