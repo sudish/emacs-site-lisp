@@ -159,7 +159,7 @@ described in PROJECT."
   (let ((root (plist-get project :root))
         (new-root))
     (catch 'not-a-project
-      (mapcar
+      (mapc
        (lambda (test)
          (when (plist-get project (car test))
            ;; grab a potentially different root
@@ -348,22 +348,22 @@ then the current project-details are used."
   (let ((highs (project-root-data :anything-highlight
                                   anything-project-root)))
     (mapcar
-     '(lambda (hit)
+     (lambda (hit)
        (let ((new (replace-regexp-in-string
-                   (regexp-quote (cdr anything-project-root))
-                   ""
-                   hit)))
-         (when highs
-           (mapc '(lambda (s)
-                   ;; propertize either the first group or the whole
-                   ;; string
-                   (when (string-match (car s) new)
-                     (put-text-property (or (match-beginning 1) 0)
-                                        (or (match-end 1) (length new))
-                                        'face (cdr s)
-                                        new)))
-                 highs))
-         (cons new hit)))
+		   (regexp-quote (cdr anything-project-root))
+		   ""
+		   hit)))
+	 (when highs
+	   (mapc (lambda (s)
+		   ;; propertize either the first group or the whole
+		   ;; string
+		   (when (string-match (car s) new)
+		     (put-text-property (or (match-beginning 1) 0)
+					(or (match-end 1) (length new))
+					'face (cdr s)
+					new)))
+		 highs))
+	 (cons new hit)))
      hits)))
 
 (defvar project-root-anything-config-files
@@ -389,8 +389,8 @@ then the current project-details are used."
                     anything-project-root project-details)))
     (candidates . (lambda ()
                     (mapcar
-                     '(lambda (b)
-                       (expand-file-name b anything-default-directory))
+                     (lambda (b)
+		       (expand-file-name b anything-default-directory))
                      (project-root-bookmarks anything-project-root))))
     (type . file)))
 
