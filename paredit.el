@@ -7,7 +7,7 @@
 ;;; THIS FILE IS SUBJECT TO CHANGE, AND NOT SUITABLE FOR DISTRIBUTION
 ;;; BY PACKAGE MANAGERS SUCH AS APT, PKGSRC, MACPORTS, &C.
 
-;;; Copyright (c) 2008, Taylor R. Campbell
+;;; Copyright (c) 2008, 2009, Taylor R. Campbell
 ;;;
 ;;; Redistribution and use in source and binary forms, with or without
 ;;; modification, are permitted provided that the following conditions
@@ -236,6 +236,7 @@ Signal an error if no clause matches."
 (defvar paredit-mode-map (make-sparse-keymap)
   "Keymap for the paredit minor mode.")
 
+;;;###autoload
 (define-minor-mode paredit-mode
   "Minor mode for pseudo-structurally editing Lisp code.
 \\<paredit-mode-map>"
@@ -1822,7 +1823,7 @@ If in a string, move the opening double-quote forward by one
 Automatically reindent the newly barfed S-expression with respect to
   its new enclosing form."
   (interactive)
-  (paredit-lose-if-not-in-sexp 'paredit-forward-slurp-sexp)
+  (paredit-lose-if-not-in-sexp 'paredit-forward-barf-sexp)
   (save-excursion
     (up-list)                           ; Up to the end of the list to
     (let ((close (char-before)))        ;   save and delete the closing
@@ -1894,7 +1895,7 @@ If in a string, move the opening double-quote backward by one
 Automatically reindent the barfed S-expression and the form from which
   it was barfed."
   (interactive)
-  (paredit-lose-if-not-in-sexp 'paredit-forward-slurp-sexp)
+  (paredit-lose-if-not-in-sexp 'paredit-backward-barf-sexp)
   (save-excursion
     (backward-up-list)
     (let ((open (char-after)))
