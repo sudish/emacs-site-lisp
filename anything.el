@@ -1,5 +1,5 @@
 ;;; anything.el --- open anything / QuickSilver-like candidate-selection framework
-;; $Id: anything.el,v 1.174 2009/03/12 19:12:24 rubikitch Exp $
+;; $Id: anything.el,v 1.176 2009/04/08 14:48:15 rubikitch Exp rubikitch $
 
 ;; Copyright (C) 2007        Tamas Patrovics
 ;;               2008, 2009  rubikitch <rubikitch@ruby-lang.org>
@@ -242,6 +242,12 @@
 
 ;; (@* "HISTORY")
 ;; $Log: anything.el,v $
+;; Revision 1.176  2009/04/08 14:48:15  rubikitch
+;; bug fix in `anything-candidate-buffer'
+;;
+;; Revision 1.175  2009/03/22 19:10:37  rubikitch
+;; New Variable: `anything-scroll-amount' (thx. ThierryVolpiatto)
+;;
 ;; Revision 1.174  2009/03/12 19:12:24  rubikitch
 ;; New API: `define-anything-type-attribute'
 ;;
@@ -802,7 +808,7 @@
 ;; New maintainer.
 ;;
 
-(defvar anything-version "$Id: anything.el,v 1.174 2009/03/12 19:12:24 rubikitch Exp $")
+(defvar anything-version "$Id: anything.el,v 1.176 2009/04/08 14:48:15 rubikitch Exp rubikitch $")
 (require 'cl)
 
 ;; (@* "User Configuration")
@@ -1462,6 +1468,10 @@ It is useful for `anything' applications.")
 This variable accepts a function, which is executed if no candidate.
 
 It is useful for `anything' applications.")
+
+(defvar anything-scroll-amount nil
+  "Scroll amount used by `anything-scroll-other-window' and `anything-scroll-other-window-down'.
+If you prefer scrolling line by line, set this value to 1.")
 
 
 (put 'anything 'timid-completion 'disabled)
@@ -2870,8 +2880,12 @@ Acceptable values of CREATE-OR-BUFFER:
          buf)
     (when create-or-buffer
       (if (bufferp create-or-buffer)
-          (add-to-list 'anything-candidate-buffer-alist
-                       (cons anything-source-name create-or-buffer))
+          (setq anything-candidate-buffer-alist
+                (cons (cons anything-source-name create-or-buffer)
+                      (delete (assoc anything-source-name anything-candidate-buffer-alist)
+                              anything-candidate-buffer-alist)))
+        (add-to-list 'anything-candidate-buffer-alist
+                     (cons anything-source-name create-or-buffer))
         (when (eq create-or-buffer 'global)
           (loop for b in (buffer-list)
                 if (string-match (format "^%s" (regexp-quote gbufname)) (buffer-name b))
@@ -2970,11 +2984,15 @@ Otherwise ignores `special-display-buffer-names' and `special-display-regexps'."
 (defun anything-scroll-other-window ()
   "Scroll other window (not *Anything* window) upward."
   (interactive)
-  (anything-scroll-other-window-base 'scroll-up))
+  (anything-scroll-other-window-base (lambda ()
+                                       (interactive)
+                                       (scroll-up anything-scroll-amount))))
 (defun anything-scroll-other-window-down ()
   "Scroll other window (not *Anything* window) downward."
   (interactive)
-  (anything-scroll-other-window-base 'scroll-down))
+  (anything-scroll-other-window-base (lambda ()
+                                       (interactive)
+                                       (scroll-down anything-scroll-amount))))
 
 ;; (@* "Utility: Visible Mark")
 (defface anything-visible-mark
@@ -4098,6 +4116,16 @@ Given pseudo `anything-sources' and `anything-pattern', returns list like
             (anything-candidate-buffer buf)
             (prog1 (buffer-string)
               (kill-buffer (current-buffer))))))
+      (expect "buf1"
+        (let (anything-candidate-buffer-alist
+              (anything-source-name "foo")
+              (buf1 (get-buffer-create "buf1"))
+              (buf2 (get-buffer-create "buf2")))
+          (anything-candidate-buffer buf1)
+          (anything-candidate-buffer buf2)
+          (prog1 (buffer-name (anything-candidate-buffer buf1))
+            (kill-buffer buf1)
+            (kill-buffer buf2))))
       (desc "action attribute")
       (expect "foo"
         (anything-test-candidates
