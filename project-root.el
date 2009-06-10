@@ -48,6 +48,7 @@
 ;; (global-set-key (kbd "C-c p g") 'project-root-grep)
 ;; (global-set-key (kbd "C-c p a") 'project-root-ack)
 ;; (global-set-key (kbd "C-c p d") 'project-root-goto-root)
+;; (global-set-key (kbd "C-c p p") 'project-root-run-default-command)
 ;;
 ;; (global-set-key (kbd "C-c p M-x")
 ;;                 'project-root-execute-extended-command)
@@ -86,6 +87,12 @@
 ;; themselves as anything candidates if you configure as instructed
 ;; below.
 
+;;; The default command
+
+;; If you give a project a :default-command property you can execute
+;; it by running `project-root-run-default-command'. Nothing fancy but
+;; very handy.
+
 ;;; installation:
 
 ;; Put this file into your `load-path' and evaulate (require
@@ -115,6 +122,11 @@
 
 (require 'find-cmd)
 
+(eval-when-compile
+  (defvar anything-project-root)
+  (require 'outline)
+  (require 'dired))
+
 (defvar project-root-extra-find-args
   (find-to-string '(prune (name ".svn" ".git")))
   "Extra find args that will be AND'd to the defaults (which are
@@ -141,6 +153,15 @@ in `project-root-file-find-process')")
 (defvar project-root-max-search-depth 20
   "Don't go any further than this many levels when searching down
 a filesystem tree")
+
+(defun project-root-run-default-command ()
+  "Run the command in :default-command, if there is one."
+  (interactive)
+  (with-project-root
+      (let ((command (project-root-data
+                      :default-command project-details)))
+        (when command
+          (funcall command)))))
 
 (defun project-root-path-matches (re)
   "Apply RE to the current buffer name returning the first
@@ -293,8 +314,8 @@ one."
   `(progn
      (unless project-details (project-root-fetch))
      (if (project-root-p)
-	 (let ((default-directory (cdr project-details)))
-	   ,@body)
+        (let ((default-directory (cdr project-details)))
+          ,@body)
        (error "No project root found"))))
 
 (defun project-root-goto-root ()
@@ -350,20 +371,20 @@ then the current project-details are used."
     (mapcar
      (lambda (hit)
        (let ((new (replace-regexp-in-string
-		   (regexp-quote (cdr anything-project-root))
-		   ""
-		   hit)))
-	 (when highs
-	   (mapc (lambda (s)
-		   ;; propertize either the first group or the whole
-		   ;; string
-		   (when (string-match (car s) new)
-		     (put-text-property (or (match-beginning 1) 0)
-					(or (match-end 1) (length new))
-					'face (cdr s)
-					new)))
-		 highs))
-	 (cons new hit)))
+                  (regexp-quote (cdr anything-project-root))
+                  ""
+                  hit)))
+        (when highs
+          (mapc (lambda (s)
+                  ;; propertize either the first group or the whole
+                  ;; string
+                  (when (string-match (car s) new)
+                    (put-text-property (or (match-beginning 1) 0)
+                                       (or (match-end 1) (length new))
+                                       'face (cdr s)
+                                       new)))
+                highs))
+        (cons new hit)))
      hits)))
 
 (defvar project-root-anything-config-files
@@ -390,7 +411,7 @@ then the current project-details are used."
     (candidates . (lambda ()
                     (mapcar
                      (lambda (b)
-		       (expand-file-name b anything-default-directory))
+                      (expand-file-name b anything-default-directory))
                      (project-root-bookmarks anything-project-root))))
     (type . file)))
 
