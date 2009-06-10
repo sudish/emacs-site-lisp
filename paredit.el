@@ -239,6 +239,11 @@ Signal an error if no clause matches."
 ;;;###autoload
 (define-minor-mode paredit-mode
   "Minor mode for pseudo-structurally editing Lisp code.
+With a prefix argument, enable Paredit Mode even if there are
+  imbalanced parentheses in the buffer.
+Paredit behaves badly if parentheses are imbalanced, so exercise
+  caution when forcing Paredit Mode to be enabled, and consider
+  fixing imbalanced parentheses instead.
 \\<paredit-mode-map>"
   :lighter " Paredit"
   ;; If we're enabling paredit-mode, the prefix to this code that
@@ -984,6 +989,7 @@ If the point is in a string or a comment, fill the paragraph instead,
           (paredit-in-comment-p))
       (fill-paragraph argument)
     (save-excursion
+      (end-of-defun)
       (beginning-of-defun)
       (indent-sexp))))
 
@@ -1461,6 +1467,29 @@ With a numeric prefix argument N, do `kill-line' that many times."
 ;;                              nil nil parse-state)
          )
         (t parse-state)))
+
+(defun paredit-copy-as-kill ()
+  "Save in the kill ring the region that `paredit-kill' would kill."
+  (interactive)
+  (save-excursion
+    (if (paredit-in-char-p)
+        (backward-char 2))
+    (let ((beginning (point))
+          (eol (point-at-eol)))
+      (let ((end-of-list-p (paredit-forward-sexps-to-kill beginning eol)))
+        (if end-of-list-p (progn (up-list) (backward-char)))
+        (copy-region-as-kill beginning
+                             (cond (kill-whole-line
+                                    (or (save-excursion
+                                          (paredit-skip-whitespace t)
+                                          (and (not (eq (char-after) ?\; ))
+                                               (point)))
+                                        (point-at-eol)))
+                                   ((and (not end-of-list-p)
+                                         (eq (point-at-eol) eol))
+                                    eol)
+                                   (t
+                                    (point))))))))
 
 ;;;; Cursor and Screen Movement
 
