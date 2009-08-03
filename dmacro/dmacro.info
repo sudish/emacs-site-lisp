@@ -1,5 +1,5 @@
-This is Info file dmacro.info, produced by Makeinfo-1.63 from the input
-file dmacro.texinfo.
+This is dmacro.info, produced by makeinfo version 4.8 from
+dmacro.texinfo.
 
    This file documents Dynamic Macro.  Copyright (c) 1991 Wayne Mesard.
 
@@ -32,21 +32,21 @@ File: dmacro.info,  Node: Administrivia,  Next: Overview,  Prev: Top,  Up: Top
 Administrivia
 *************
 
-   This manual and the Dmacro software package may be redistributed only
+This manual and the Dmacro software package may be redistributed only
 under the terms of the GNU General Public License.  *Note License:
 (Emacs)License, for details.
 
    This release has been tested with Emacs19 (version 2.0 did have a
 couple of compatability problems with Emacs19).  This version doesn't
 work with Emacs18, but that's only because I used add-hook.  (Obnoxious
-aren't I?) It should work with Lucid Emacs, etc.
+aren't I?)  It should work with Lucid Emacs, etc.
 
    Questions, problems, suggestions should be sent to
 `WMesard@sgi.com'.  Enhancement requests are always welcome.  Be sure
 to mention the version of Dmacro that you're using.
 
    "`Dmacro'?!  That's a terrible name.  It sounds like a brand of rat
-poison."      -MD 10/91.
+poison."       -MD 10/91.
 
 
 File: dmacro.info,  Node: Overview,  Next: Tutorial,  Prev: Administrivia,  Up: Top
@@ -54,7 +54,7 @@ File: dmacro.info,  Node: Overview,  Next: Tutorial,  Prev: Administrivia,  Up: 
 Overview
 ********
 
-   Dynamic Macro is a program for creating structured text in Emacs.  It
+Dynamic Macro is a program for creating structured text in Emacs.  It
 can significantly reduce typing time and increase the formatting
 consistency of source code and other structured text.  It allows users
 to easily construct and use dynamic macros for complex text such as time
@@ -80,25 +80,25 @@ read far enough.
 
 File: dmacro.info,  Node: Tutorial,  Next: Using Dmacro,  Prev: Overview,  Up: Top
 
-Dmacros for C -- A tutorial
-***************************
+1 Dmacros for C -- A tutorial
+*****************************
 
-   This section is a step-by-step illustration of how a user interacts
+This section is a step-by-step illustration of how a user interacts
 with Dmacro.  Most of Dmacro's basic features will be touched on.
 Familiarity with Emacs is expected.  The example uses a collection of
 macros built for writing C programs.  Familiarity with C is not
 required for this tutorial, but it will probably help.
 
    If Dmacro has already been properly installed at your site (*note
-Installation::.), simply start up Emacs and type:
+Installation::), simply start up Emacs and type:
 
-     `M-x load-library RET dm-c RET'
+     M-x load-library <RET> dm-c <RET>
 
    If you want to take it for a test drive before installing it, first
 make sure that the distribution directory is your current working
 directory, then invoke Emacs and type:
 
-     `M-x load-file RET dm-c.el RET'
+     M-x load-file <RET> dm-c.el <RET>
 
    If either of these produces an error message, contact your system
 administrator or local Emacs guru for help.
@@ -107,20 +107,19 @@ administrator or local Emacs guru for help.
 for writing C programs, we need an empty C-mode buffer to work with.
 Type:
 
-     `C-x C-f ~/dmacro-demo.c RET'
-
-But wait a minute!  Even though it's a new file,  it contains a comment
-block like this:
+     C-x C-f ~/dmacro-demo.c <RET>
+   But wait a minute!  Even though it's a new file,  it contains a
+comment block like this:
 
      /* Copyright (c) 1991 by A BIG Corporation.  All Rights Reserved */
-     
+
      /***
         NAME
           dmacro-demo
         PURPOSE
-     
+
         NOTES
-     
+
         HISTORY
           wmesard - Dec 24, 1991: Created.
      ***/
@@ -137,20 +136,20 @@ immediately begin typing to fill in the rest of the comment block.
 macros explicitly.  But first move the cursor below the comment block,
 to the very end of the buffer:
 
-     `M->'
+     M->
 
    Now type:
 
-     `C-c d'
+     C-c d
 
 This invokes the command, `insert-dmacro'.  Notice that you are being
 prompted for the name of a dynamic macro in the minibuffer. Type:
 
-     `m'
+     m
 
 followed by a question mark:
 
-     `?'
+     ?
 
    In the `*Completions*' buffer, Dmacro displays a list of all macros
 that have names beginning with `m':
@@ -161,13 +160,13 @@ that have names beginning with `m':
 
 Type question mark a second time:
 
-     `?'
+     ?
 
 Now the list in the `*Completions*' buffer has expanded so that each
 macro name is accompanied by a brief description:
 
      Possible completions are:
-     
+
      main:     an empty main() function with args
      mal:      call to malloc (prompts for var type)
      masthead: comment block for the top of a .c file
@@ -175,7 +174,7 @@ macro name is accompanied by a brief description:
 This two-level help feature can be used whenever you are being prompted
 for a macro name.  (Feel free to use it as we progress through this
 tutorial, even though we won't mention it again until the very end.  In
-this case we want `main', *so finish typing the word and hit RET.*
+this case we want `main', *so finish typing the word and hit <RET>.*
 
    The `main' macro gets inserted into the buffer.  The cursor is now
 positioned in the [empty] body of the function, ready for you to begin
@@ -185,13 +184,13 @@ typing:
      char **argv;
      int argc;
      {
-     
+
      }
 
    Let's insert a printf statement.  For this we use the `p' macro.
 Type:
 
-     `C-c d p RET'
+     C-c d p <RET>
 
 The following is inserted with the cursor at the start of the string:
 
@@ -200,35 +199,35 @@ The following is inserted with the cursor at the start of the string:
 Finish the command by typing some text like `Hello world'.
 
    Now, let's make the program a little more interesting.  *Position
-the cursor after the left curly brace (`{') and hit Linefeed*.  Add a
+the cursor after the left curly brace (`{') and hit <Linefeed>*.  Add a
 variable declaration before the printf command:
 
-     `int mycounter;'
+     int mycounter;
 
    Now let's try a `for' loop.  *Move the cursor so that it's on the
 right curly brace (`}').* and type:
 
-     `C-c d ifor RET.'
+     C-c d ifor <RET>.
 
 The skeleton of a for statement is inserted:
 
      for (<var> = 0; <var> < ; ++<var>)
      {
-     
+
      }
 
 and in the minibuffer, Dmacro is prompting you for the name of the
 increment variable to use.  Enter the name of the variable you just
 declared:
 
-     `mycounter RET'
+     mycounter <RET>
 
    Notice that the placeholders are replaced by the variable name and
 the entire statement is indented properly:
 
        for (mycounter = 0; mycounter < ; ++mycounter)
        {
-     
+
        }
 
 And, as usual, the cursor is positioned at the point where you're mostly
@@ -240,7 +239,7 @@ macro sets a mark in its body.  (In fact, this is true of many of the
 macros defined in `dm-c'.)  So instead of cursoring down to fill in the
 body, you can simply type:
 
-     `C-x C-x'
+     C-x C-x
 
 to run the Emacs command `exchange-point-and-mark'.  (`Point' is Emacs
 terminology for the cursor.  *Note Mark: (Emacs)Mark, for more
@@ -255,12 +254,12 @@ that `C-x C-x' does the right thing in the `p' macro, too):
 variable is equal to three.  That means we want to wrap the printf
 command in a conditional statement.  Type:
 
-     `C-u C-c l'
+     C-u C-c l
 
 (Note that that last character is an `L' not the number `1').  At the
 familiar `Dmacro:' prompt, type:
 
-     `ife RET'
+     ife <RET>
 
 The for loop now looks like:
 
@@ -272,7 +271,7 @@ The for loop now looks like:
 We'll get to that `C-u' in a minute.  First let's look at the `C-c l'.
 This key sequence invokes the command `dmacro-wrap-line'.  This is
 similar to `insert-dmacro' (`C-c d'), but instead of merely inserting
-the macro, it *wraps* the current line inside of the macro.  If you
+the macro, it _wraps_ the current line inside of the macro.  If you
 look at the buffer, that's exactly what happened: the old printf
 statement got stuck in the middle of the if/else macro.
 
@@ -291,12 +290,12 @@ this command, and it's sibling, `dmacro-wrap-region'.
 
    Now back to our tutorial.  Type:
 
-     `C-x C-x'
+     C-x C-x
 
 The cursor jumps back to the mark (which would normally be the point).
 Enter the condition for the if statement:
 
-     `mycounter != 3'
+     mycounter != 3
 
    *Now move the cursor down to the line below the word `else' and
 enter the else clause* (using the `p' macro if you like):
@@ -307,7 +306,7 @@ enter the else clause* (using the `p' macro if you like):
 the main() body and create a blank line.*  Now put a comment on that
 line by typing:
 
-     `M-; Tab'
+     M-; Tab
 
 An empty comment gets created.  (This is an Emacs thing, not a Dmacro
 thing, although it would be easy to create a macro to do this.)  Fill
@@ -318,7 +317,7 @@ it in so that it looks something like:
    Since you're a conscientious programmer, you want to initial and date
 this comment, so others will know who to blame.  Type:
 
-     `C-c t'
+     C-c t
 
 Notice that your initials and today's date get inserted so that the
 line looks something like:
@@ -331,53 +330,53 @@ this case, `dm-c' has a macro named `dstamp' that it binds to `C-c t'.
 (The `t' stands for "timestamp".)  So another way to do what you just
 did would be to type:
 
-     `C-c d dstamp RET'
+     C-c d dstamp <RET>
 
    Let's undo what we just did and do it again the long way.  This will
 also give us a chance to show off another feature of the `Dmacro:'
 prompt.  Type:
 
-     `C-x u'
+     C-x u
 
 (or which ever key the `undo' command is bound to on your system) to
 undo the last action.  Then type:
 
-     `C-c d d'
+     C-c d d
 
-but don't hit RET yet.  Type a question mark:
+but don't hit <RET> yet.  Type a question mark:
 
-     `?'
+     ?
 
    Notice that several macro names start with the letter `d' but only
 `dstamp' starts with the letters `ds' Wouldn't it be nice if you only
 had to type enough letters of a macro name to identify it uniquely,
 rather than typing the entire name?  Well in fact, you can.  Type:
 
-     `s RET'
+     s <RET>
 
 The `dstamp' macro gets inserted (again).
 
    Now let's take a look at your final product:
 
      /* Copyright (c) 1991 by A BIG Corporation.  All Rights Reserved */
-     
+
      /***
         NAME
           dmacro-demo
         PURPOSE
           To learn about Dmacro.
         NOTES
-     
+
         HISTORY
           wmesard - Dec 24, 1991: Created.
      ***/
-     
+
      main(argc, argv)
      int argc;
      char **argv;
      {
        int mycounter;
-     
+
        (void) printf("Hello world\n");
        for (mycounter = 0; mycounter < 5; ++mycounter)
        {
@@ -398,7 +397,7 @@ compile since it reduces the risk of syntax errors.
    There are many more macros defined in `dm-c' than the few we covered
 here.  To list them all type:
 
-     `C-c d ?'
+     C-c d ?
 
    This collection of macros can be used by any C programmer, but it
 was based on the coding standards of one particular software house.
@@ -408,12 +407,12 @@ You are encouraged to extend and customize it to suit your needs.
 
 File: dmacro.info,  Node: Using Dmacro,  Next: Installation,  Prev: Tutorial,  Up: Top
 
-Using Dmacro
-************
+2 Using Dmacro
+**************
 
-   This section describes the commands and keys users invoke when
-inserting macros.  *Note dont-bind-my-keys: Customization, for
-information about changing the default key bindings.
+This section describes the commands and keys users invoke when inserting
+macros.  *Note dont-bind-my-keys: Customization, for information about
+changing the default key bindings.
 
 * Menu:
 
@@ -425,29 +424,29 @@ information about changing the default key bindings.
 
 File: dmacro.info,  Node: dmacro-load,  Next: insert-dmacro,  Up: Using Dmacro
 
-dmacro-load
-===========
+2.1 dmacro-load
+===============
 
-   A Dmacro file is a file containing macro definitions (e.g., the
+A Dmacro file is a file containing macro definitions (e.g., the
 `demo.dm' file which came with the Dmacro distribution).  *Note
 Installation::, for information about making a collection of macros a
 permanent part of your Emacs environment.  To load Dmacro files on a
 per-session basis use the `dmacro-load' command:
 
-     `M-x dmacro-load RET ~/elisp/demo.dm RET'
+     M-x dmacro-load <RET> ~/elisp/demo.dm <RET>
 
 
 File: dmacro.info,  Node: insert-dmacro,  Next: dmacro-wrap-line,  Prev: dmacro-load,  Up: Using Dmacro
 
-insert-dmacro
-=============
+2.2 insert-dmacro
+=================
 
-   This is the main interface to Dmacro.  It is normally bound to `C-c
-d'.  It prompts for a macro name.  Question mark (`?') and `TAB' work
-as expected during prompting.  For example, if you type `ds' followed
-by question mark at the prompt, a buffer will pop up containing a list
-of macro names that start with the letters `ds'.  If you type `?' again
-it will also display the documentation for those macros, or the actual
+This is the main interface to Dmacro.  It is normally bound to `C-c d'.
+It prompts for a macro name.  Question mark (`?') and `<TAB>' work as
+expected during prompting.  For example, if you type `ds' followed by
+question mark at the prompt, a buffer will pop up containing a list of
+macro names that start with the letters `ds'.  If you type `?' again it
+will also display the documentation for those macros, or the actual
 macro text if the macro is undocumented.
 
    After entering the name, the macro is expanded and inserted in the
@@ -456,10 +455,10 @@ current buffer.
 
 File: dmacro.info,  Node: dmacro-wrap-line,  Next: dmacro-wrap-region,  Prev: insert-dmacro,  Up: Using Dmacro
 
-dmacro-wrap-line
-================
+2.3 dmacro-wrap-line
+====================
 
-   This is similar to `insert-dmacro' except that it has the effect of
+This is similar to `insert-dmacro' except that it has the effect of
 sticking the current line in the middle of the to-be-inserted macro.
 It is normally bound to `C-c l'.  For example, consider a macro named
 `ife' that expands to:
@@ -474,7 +473,7 @@ a mark.  If you type `abc' on a line by itself and then invoke
 `dmacro-wrap-line', the result will look like:
 
      if (abc)
-     
+
      else
 
    With a prefix argument the line will be wrapped at a mark instead of
@@ -489,7 +488,7 @@ with a prefix argument.  So typing `C-u 2 C-c l' would use the second
 mark, producing:
 
      if ()
-     
+
      else
        abc
 
@@ -509,26 +508,26 @@ are useful for both operations.
 
 File: dmacro.info,  Node: dmacro-wrap-region,  Prev: dmacro-wrap-line,  Up: Using Dmacro
 
-dmacro-wrap-region
-==================
+2.4 dmacro-wrap-region
+======================
 
-   This command, normally bound to `C-c r' is just like
-`dmacro-wrap-line' except that it operates on all the text between
-point and mark.  For example, to wrap several lines of C code in curly
-braces using the `b' macro defined in `dm-c.el'; or to apply a macro
-containing a TeX command to a word or sentence.
+This command, normally bound to `C-c r' is just like `dmacro-wrap-line'
+except that it operates on all the text between point and mark.  For
+example, to wrap several lines of C code in curly braces using the `b'
+macro defined in `dm-c.el'; or to apply a macro containing a TeX
+command to a word or sentence.
 
-   Mark-setting commands such as `mark-word' (`ESC @') and
-`mark-paragraph' (`ESC h') are useful for specifying the to-be-wrapped
-region (*note Mark: (Emacs)Mark.).
+   Mark-setting commands such as `mark-word' (`<ESC> @') and
+`mark-paragraph' (`<ESC> h') are useful for specifying the
+to-be-wrapped region (*note Mark: (Emacs)Mark.).
 
 
 File: dmacro.info,  Node: Installation,  Next: Creating Macros,  Prev: Using Dmacro,  Up: Top
 
-Installing Dynamic Macro
-************************
+3 Installing Dynamic Macro
+**************************
 
-   This section describes how to make Dmacro a permanent part of your
+This section describes how to make Dmacro a permanent part of your
 Emacs environment.
 
   1. To avoid confusion during installation, unpack Dmacro in a
@@ -557,16 +556,15 @@ Emacs environment.
 
 File: dmacro.info,  Node: Creating Macros,  Next: Customization,  Prev: Installation,  Up: Top
 
-Creating Macros
-***************
+4 Creating Macros
+*****************
 
-   This section describes two ways of constructing new dynamic macros.
-The old-fashioned way is to create a Dmacro file by hand.  The
-alternative is Dmacro Builder, which allows you to create macros
-interactively.  This section also describes all the built-in Dmacro
-functions and modifiers.  Together these are referred to as Dmacro
-directives.  They are the building blocks from which macros are
-constructed.
+This section describes two ways of constructing new dynamic macros.  The
+old-fashioned way is to create a Dmacro file by hand.  The alternative
+is Dmacro Builder, which allows you to create macros interactively.
+This section also describes all the built-in Dmacro functions and
+modifiers.  Together these are referred to as Dmacro directives.  They
+are the building blocks from which macros are constructed.
 
    Dmacros are stored in tables which are associated with one or more
 major mode.  For example, macros for Lisp programs would go in the
@@ -585,12 +583,12 @@ stored in the default or `nil' table.
 
 File: dmacro.info,  Node: Dmacro Builder,  Next: Dmacro Files,  Up: Creating Macros
 
-Dmacro Builder
-==============
+4.1 Dmacro Builder
+==================
 
-   There are an awful lot of syntax rules and other nastiness to be
-aware of when you are building macros by hand (*note Dmacro Files::.).
-Dmacro Builder is designed to take care of all that for you.  *Note
+There are an awful lot of syntax rules and other nastiness to be aware
+of when you are building macros by hand (*note Dmacro Files::).  Dmacro
+Builder is designed to take care of all that for you.  *Note
 Customization: dont-bind-my-keys, for information about changing the
 key bindings described here.
 
@@ -604,18 +602,18 @@ key bindings described here.
 
 File: dmacro.info,  Node: dmacro-build,  Next: dmacro-build-command,  Up: Dmacro Builder
 
-dmacro-build
-------------
+4.1.1 dmacro-build
+------------------
 
-   Invoke this command by typing:
+Invoke this command by typing:
 
-     `M-x dmacro-build'
+     M-x dmacro-build
 
 to begin defining a new mode-specific macro.
 
    To define a global macro, preface the command with an argument:
 
-     `C-u M-x dmacro-build'
+     C-u M-x dmacro-build
 
    You will be prompted for the name of the new macro and its
 documentation string.  If the macro already exists, you will be asked
@@ -633,10 +631,10 @@ change your mind, you can abort the macro definition by typing `C-]'.
 
 File: dmacro.info,  Node: dmacro-build-command,  Next: dmacro-build-modifier,  Prev: dmacro-build,  Up: Dmacro Builder
 
-dmacro-build-command
---------------------
+4.1.2 dmacro-build-command
+--------------------------
 
-   When typing the text of the new macro, you may find that you need
+When typing the text of the new macro, you may find that you need
 something more than plain old hard-coded text.  That's where
 `dmacro-build-command' comes in.  Normally, this is bound to `C-c C-d'.
 
@@ -651,39 +649,40 @@ of Dmacro functions.
 
 File: dmacro.info,  Node: dmacro-build-modifier,  Next: dmacro-save,  Prev: dmacro-build-command,  Up: Dmacro Builder
 
-dmacro-build-modifier
----------------------
+4.1.3 dmacro-build-modifier
+---------------------------
 
-   When the cursor is positioned on or immediately after the text from a
+When the cursor is positioned on or immediately after the text from a
 directive, you may apply one or more modifiers to it.  Normally, this
 command is bound to `C-c C-m'.  When you invoke it, you will be
 prompted as follows:
 
+
      Modifiers: (U)pper (L)ower (C)aps (P)ad (S)ubstring (E)xpression. Or Return
 
    Enter one or more of the indicated letters.  When you're finished hit
-`RET'.  The prompt will disappear and the modifiers will be applied to
+`<RET>'.  The prompt will disappear and the modifiers will be applied to
 the text.  *Note Modifiers::, for a complete description of the
 modifiers.
 
 
 File: dmacro.info,  Node: dmacro-save,  Prev: dmacro-build-modifier,  Up: Dmacro Builder
 
-dmacro-save
------------
+4.1.4 dmacro-save
+-----------------
 
-   After you have defined new macros, type `M-x dmacro-save RET
+After you have defined new macros, type `M-x dmacro-save <RET>
 FILENAME'.  This will store all currently-defined macros in the
 specified file (which can then be reloaded via `dmacro-load'.
 
 
 File: dmacro.info,  Node: Dmacro Files,  Next: Directives,  Prev: Dmacro Builder,  Up: Creating Macros
 
-Dmacro Files
-============
+4.2 Dmacro Files
+================
 
-   A Dmacro file is a structured file containing Dmacro definitions.
-The format of each definition is as follows:
+A Dmacro file is a structured file containing Dmacro definitions.  The
+format of each definition is as follows:
 
      Name      Expander       Documentation
      Text
@@ -706,7 +705,7 @@ statement of the form:
 and c++-mode.
 
    If you're not sure of the exact name of a major mode, go to a buffer
-which is in that mode and type `Control-h v major-mode RET'.
+which is in that mode and type `Control-h v major-mode <RET>'.
 
    There is another control statement called `# ALIAS'.  *Note Defining
 Aliases::, for details.
@@ -718,18 +717,18 @@ Aliases::, for details.
      #######
      # MODE: c-mode
      #######
-     
+
      # ### First definition ###
-     
+
      d
      #define
      #
-     
+
      # ### Second definition ###
-     
+
      masthead        expand       Banner for the top of a source code file
      /* File: ~(file). Copyright (c) ~(year) BIG Corp. */
-     
+
      #
 
 * Menu:
@@ -743,43 +742,43 @@ Aliases::, for details.
 
 File: dmacro.info,  Node: Name,  Next: Expander,  Up: Dmacro Files
 
-Name
-----
+4.2.1 Name
+----------
 
-   This is an Elisp symbol (`d' and `masthead' above.  This is what the
+This is an Elisp symbol (`d' and `masthead' above.  This is what the
 user will eventually enter at `insert-dmacro''s prompt.
 
 
 File: dmacro.info,  Node: Expander,  Next: Documentation,  Prev: Name,  Up: Dmacro Files
 
-Expander
---------
+4.2.2 Expander
+--------------
 
-   The expander may be omitted (as it was in the first example above).
-If specified, it's value should be `expand' for ordinary macro
-expansion, or `indent' which means that in addition to expansion, each
-line of the expanded text will be indented in whatever way is
-appropriate for the current buffer's mode.
+The expander may be omitted (as it was in the first example above).  If
+specified, it's value should be `expand' for ordinary macro expansion,
+or `indent' which means that in addition to expansion, each line of the
+expanded text will be indented in whatever way is appropriate for the
+current buffer's mode.
 
 
 File: dmacro.info,  Node: Documentation,  Next: Text,  Prev: Expander,  Up: Dmacro Files
 
-Documentation
--------------
+4.2.3 Documentation
+-------------------
 
-   The optional documentation string is a short description of what this
+The optional documentation string is a short description of what this
 Dmacro does.  *Note insert-dmacro::, for a description of how the
 documentation is accessed by the user.
 
 
 File: dmacro.info,  Node: Text,  Next: Shortcuts,  Prev: Documentation,  Up: Dmacro Files
 
-Text
-----
+4.2.4 Text
+----------
 
-   The text is a string of characters interspersed with Dmacro
-directives.  Each directive is prefixed by the tilde character (`~').
-So this macro definition:
+The text is a string of characters interspersed with Dmacro directives.
+Each directive is prefixed by the tilde character (`~').  So this macro
+definition:
 
      test
      I am ~(user-name), and the time is ~(hour):~(min):~(sec).
@@ -807,14 +806,14 @@ backslash (`\').
 
 File: dmacro.info,  Node: Shortcuts,  Prev: Text,  Up: Dmacro Files
 
-Shortcuts
----------
+4.2.5 Shortcuts
+---------------
 
-   If a directive doesn't have any arguments or modifiers (described
-below) The parenthesis are not needed.  In this case, the word
-immediately after the tilde is used as the directive (where "word" is
-anything that is considered a word in the current Emacs buffer plus the
-dash (`-').  So the `test', above, could be rewritten as:
+If a directive doesn't have any arguments or modifiers (described below)
+The parenthesis are not needed.  In this case, the word immediately
+after the tilde is used as the directive (where "word" is anything that
+is considered a word in the current Emacs buffer plus the dash (`-').
+So the `test', above, could be rewritten as:
 
      test
      I am ~user-name, and the time is ~hour:~min:~sec.
@@ -822,10 +821,10 @@ dash (`-').  So the `test', above, could be rewritten as:
 
 File: dmacro.info,  Node: Directives,  Next: Auto Insertion,  Prev: Dmacro Files,  Up: Creating Macros
 
-Dmacro Directives
-=================
+4.3 Dmacro Directives
+=====================
 
-   At minimum, a Dmacro directive consists of a function name.  It may
+At minimum, a Dmacro directive consists of a function name.  It may
 also include arguments and modifiers.  This section describes these
 parts in more detail.
 
@@ -837,12 +836,12 @@ parts in more detail.
 
 File: dmacro.info,  Node: Functions,  Next: Modifiers,  Up: Directives
 
-Functions
----------
+4.3.1 Functions
+---------------
 
-   Dynamic Macro functions are the predefined set of routines on which
-all Dynamic Macro directives are built.  Each function returns a string
-or nil.
+Dynamic Macro functions are the predefined set of routines on which all
+Dynamic Macro directives are built.  Each function returns a string or
+nil.
 
 `@'
      Synonym for `~point'.  See below.
@@ -1018,14 +1017,14 @@ or nil.
 
 `year'
      The year as a four digit number.
-
+   
 
 File: dmacro.info,  Node: Modifiers,  Prev: Functions,  Up: Directives
 
-Modifiers
----------
+4.3.2 Modifiers
+---------------
 
-   Dmacro modifiers are transformations applied to a directive.  This
+Dmacro modifiers are transformations applied to a directive.  This
 section lists the modifiers available and gives several examples of
 their usage.  Modifiers are applied to a directive using the following
 format:
@@ -1042,10 +1041,10 @@ format:
 
 File: dmacro.info,  Node: Casification,  Next: Padding,  Up: Modifiers
 
-Casification
-............
+4.3.2.1 Casification
+....................
 
-   The three modifiers, `:up,' `:down' and `:cap' will, respectively,
+The three modifiers, `:up,' `:down' and `:cap' will, respectively,
 convert the text to all upper case, all lower case, or capitalize each
 word.  So to display the current month in all upper case, you would use
 the directive:
@@ -1055,11 +1054,11 @@ the directive:
 
 File: dmacro.info,  Node: Padding,  Next: Substrings,  Prev: Casification,  Up: Modifiers
 
-Padding
-.......
+4.3.2.2 Padding
+...............
 
-   If the text contains any leading spaces, the `:pad' modifier can be
-used to specify how it should be handled.  For example, the `~(hour)'
+If the text contains any leading spaces, the `:pad' modifier can be used
+to specify how it should be handled.  For example, the `~(hour)'
 directive always produces a two character string.  Before 10 o'clock
 the first character is a space.  To replace the space with a zero, you
 would say:
@@ -1079,10 +1078,10 @@ would return a one character string before 10 o'clock.
 
 File: dmacro.info,  Node: Substrings,  Next: Sub-expressions,  Prev: Padding,  Up: Modifiers
 
-Substrings
-..........
+4.3.2.3 Substrings
+..................
 
-   You may only be interested in a portion of the string returned by a
+You may only be interested in a portion of the string returned by a
 directive.  To return a part of the string, specify the position of
 characters in which you are interested.  If you specify a negative
 number, Dmacro counts from the end of the string.  For example:
@@ -1099,13 +1098,13 @@ the original string is returned if there's an error.  For example:
 
 File: dmacro.info,  Node: Sub-expressions,  Prev: Substrings,  Up: Modifiers
 
-Sub-expressions
-...............
+4.3.2.4 Sub-expressions
+.......................
 
-   If you specify the `:sexp' modifier, Dmacro will return
-sub-expressions instead of a substring of the original text.  (An
-expression is a balanced Elisp expression, i.e., a string, token or
-list.)  For example, to get the user's first name only, you would say:
+If you specify the `:sexp' modifier, Dmacro will return sub-expressions
+instead of a substring of the original text.  (An expression is a
+balanced Elisp expression, i.e., a string, token or list.)  For
+example, to get the user's first name only, you would say:
 
      ~((user-name) :sexp 0 0)
 
@@ -1116,11 +1115,11 @@ To get the last name only, say:
 
 File: dmacro.info,  Node: Auto Insertion,  Next: Binding Dmacros to Keys,  Prev: Directives,  Up: Creating Macros
 
-Auto-Insertion of Dmacros
-=========================
+4.4 Auto-Insertion of Dmacros
+=============================
 
-   The Dmacro package can automatically insert a macro whenever you
-create a new file.  This behavior is controlled by the variable
+The Dmacro package can automatically insert a macro whenever you create
+a new file.  This behavior is controlled by the variable
 `auto-dmacro-alist'.  Its format is similar to Emacs' `auto-mode-alist'
 (*note Choosing Modes: (Emacs)Choosing Modes.).  Each element in the
 list is a dotted pair containing a regular expression describing a
@@ -1149,10 +1148,10 @@ necessary).
 
 File: dmacro.info,  Node: Binding Dmacros to Keys,  Prev: Auto Insertion,  Up: Creating Macros
 
-Binding Dmacros to Keys
-=======================
+4.5 Binding Dmacros to Keys
+===========================
 
-   The function `dmacro-command' makes it possible to turn dmacros into
+The function `dmacro-command' makes it possible to turn dmacros into
 full-fledged Emacs commands.  These, in turn, can be bound to keys.
 (Die-hard Emacs users like to have everything key bindings for
 everything.)
@@ -1180,12 +1179,12 @@ files.  The second example binds the `dstamp' macro to `C-c d' and the
 
 File: dmacro.info,  Node: Customization,  Next: Defining New Directives,  Prev: Creating Macros,  Up: Top
 
-Customizing Dmacro
-******************
+5 Customizing Dmacro
+********************
 
-   This section describes user-settable variables which customize
-Dmacro's behavior.  They can be set using the `setq' function in your
-`.emacs' file.  Alternatively, you can use `M-x set-variable' or `M-x
+This section describes user-settable variables which customize Dmacro's
+behavior.  They can be set using the `setq' function in your `.emacs'
+file.  Alternatively, you can use `M-x set-variable' or `M-x
 edit-options' to change their values interactively.
 
    Use `C-h v' to find out the current setting of these options.  *Note
@@ -1200,8 +1199,8 @@ these variable manipulation commands.
 
 File: dmacro.info,  Node: Interface Options,  Next: Expansion Options,  Up: Customization
 
-Interface Options
-=================
+5.1 Interface Options
+=====================
 
 * Menu:
 
@@ -1211,12 +1210,12 @@ Interface Options
 
 File: dmacro.info,  Node: dont-bind-my-keys,  Next: dmacro-prompt,  Up: Interface Options
 
-dont-bind-my-keys
------------------
+5.1.1 dont-bind-my-keys
+-----------------------
 
-   Dmacro and Dmacro Builder automatically bind certain functions to
-keys.  To prevent this, set `dont-bind-my-keys' to `t' before loading
-these programs.  This is useful if you want to bind the functions to
+Dmacro and Dmacro Builder automatically bind certain functions to keys.
+To prevent this, set `dont-bind-my-keys' to `t' before loading these
+programs.  This is useful if you want to bind the functions to
 different keys or if you simply don't want Dmacro messing with your key
 mappings.
 
@@ -1226,10 +1225,10 @@ bindings).
 
 File: dmacro.info,  Node: dmacro-prompt,  Prev: dont-bind-my-keys,  Up: Interface Options
 
-dmacro-prompt
--------------
+5.1.2 dmacro-prompt
+-------------------
 
-   One of Dmacro's most important features is its ability get a string
+One of Dmacro's most important features is its ability get a string
 from the user at expansion time.  There are three modes in for doing
 this: prompting mode, post-expansion mode and pre-expansion mode.
 
@@ -1265,8 +1264,8 @@ So multi-word entries can be specified by wrapping quotes around them.
 
 File: dmacro.info,  Node: Expansion Options,  Prev: Interface Options,  Up: Customization
 
-Expansion Options
-=================
+5.2 Expansion Options
+=====================
 
 * Menu:
 
@@ -1277,10 +1276,10 @@ Expansion Options
 
 File: dmacro.info,  Node: dmacro-month-names,  Next: dmacro-prefix-char,  Up: Expansion Options
 
-dmacro-month-names
-------------------
+5.2.1 dmacro-month-names
+------------------------
 
-   This variable contains a list of the names of the 12 months.  The
+This variable contains a list of the names of the 12 months.  The
 `~month' function uses this list.  Change these to suit your language or
 your tastes.
 
@@ -1292,33 +1291,33 @@ your tastes.
 
 File: dmacro.info,  Node: dmacro-prefix-char,  Next: dmacro-rank-in-initials,  Prev: dmacro-month-names,  Up: Expansion Options
 
-dmacro-prefix-char
-------------------
+5.2.2 dmacro-prefix-char
+------------------------
 
-   By default, Dmacro uses a tilde (`~') to mark the start of a
-directive within the macro text.  If, for some bizarre reason, you want
-to use another character, set this variable.  It must be a string
-containing a single character.
+By default, Dmacro uses a tilde (`~') to mark the start of a directive
+within the macro text.  If, for some bizarre reason, you want to use
+another character, set this variable.  It must be a string containing a
+single character.
 
 
 File: dmacro.info,  Node: dmacro-rank-in-initials,  Prev: dmacro-prefix-char,  Up: Expansion Options
 
-dmacro-rank-in-initials
------------------------
+5.2.3 dmacro-rank-in-initials
+-----------------------------
 
-   When the `~(user-initials)' function sees a rank (that is, `Jr',
-`Sr', `II', `III', etc.) in a user's name, it normally ignores it.  If
-this variable is non-nil, it will include it as is.  For example, Pope
-John Paul II would normally have the initials `PJP'.  If he set this
+When the `~(user-initials)' function sees a rank (that is, `Jr', `Sr',
+`II', `III', etc.) in a user's name, it normally ignores it.  If this
+variable is non-nil, it will include it as is.  For example, Pope John
+Paul II would normally have the initials `PJP'.  If he set this
 variable to non-nil, his initials would change to `PJPII'.
 
 
 File: dmacro.info,  Node: Defining New Directives,  Next: Release Notes,  Prev: Customization,  Up: Top
 
-Defining New Directives
-***********************
+6 Defining New Directives
+*************************
 
-   This section describes how to create new Dmacro directives.  If the
+This section describes how to create new Dmacro directives.  If the
 existing set of functions is not sufficient for your needs, you can add
 to it.  Dmacro Builder will also recognize these newly-defined
 directives.
@@ -1335,20 +1334,20 @@ way they are defined is very different.
 
 File: dmacro.info,  Node: Defining Aliases,  Next: Defining Functions,  Up: Defining New Directives
 
-Defining Aliases
-================
+6.1 Defining Aliases
+====================
 
-   Aliases are synonyms for complicated and/or commonly used dmacro
+Aliases are synonyms for complicated and/or commonly used dmacro
 directives.  They make the text section of a dmacro easier to read.
 The simplest way to define them is to place the `# ALIAS:' control
 statement in the file in which the alias is used.  Some examples:
 
      # The ~@ function is a synonym for ~point. It could have been defined like:
      # ALIAS: @ (point)
-     
+
      # The last 2 digits of the year.
      # ALIAS: year2  ((year) 2))
-     
+
      # Prompt for header file name.
      # ALIAS: hfileprompt (prompt header-file "Header file name:"
              read-file-name "/usr/include")
@@ -1361,10 +1360,10 @@ therefore, span multiple lines.
 
      ;; The ~@ function is a synonym for ~point. It could have been defined like:
      (def-dmacro-alias @ point)
-     
+
      ;; The last 2 digits of the year.
      (def-dmacro-alias year2  ((year) 2))
-     
+
      ;; Prompt for header file name.
      (def-dmacro-alias hfileprompt
        (prompt header-file "Header file name:" read-file-name "/usr/include"))
@@ -1372,14 +1371,14 @@ therefore, span multiple lines.
 
 File: dmacro.info,  Node: Defining Functions,  Prev: Defining Aliases,  Up: Defining New Directives
 
-Defining Functions
-==================
+6.2 Defining Functions
+======================
 
-   The `~eval' function can be inconvenient if your macros contain
-complex or frequently-used Elisp expressions.  In this case, you may
-want to create a new Dmacro function.  You are responsible for ensuring
-that your functions always return a string or nil, and that they always
-leave the point where they found it.
+The `~eval' function can be inconvenient if your macros contain complex
+or frequently-used Elisp expressions.  In this case, you may want to
+create a new Dmacro function.  You are responsible for ensuring that
+your functions always return a string or nil, and that they always leave
+the point where they found it.
 
    `def-dmacro-function' comes in two flavors:
 
@@ -1408,8 +1407,8 @@ does, too.  So this could be used in macro text as follows:
 
 File: dmacro.info,  Node: Release Notes,  Next: Glossary,  Prev: Defining New Directives,  Up: Top
 
-Release Notes
-*************
+7 Release Notes
+***************
 
    * Fixed bug from version 2.4 which causes # MODE:'s to prepend to
      the mode list instead of resetting it (this caused the wrong macro
@@ -1442,8 +1441,8 @@ Release Notes
 
 File: dmacro.info,  Node: Glossary,  Next: Key Index,  Prev: Release Notes,  Up: Top
 
-Glossary
-********
+8 Glossary
+**********
 
 alias
      A symbol corresponding to a shorthand notation for a directive.
@@ -1491,15 +1490,17 @@ File: dmacro.info,  Node: Key Index,  Next: Function and Variable Index,  Prev: 
 Key Index
 *********
 
+ [index ]
 * Menu:
 
-* C-c C-d:                              dmacro-build-command.
-* C-c C-m:                              dmacro-build-modifier.
-* C-c d:                                insert-dmacro.
-* C-c d ?:                              insert-dmacro.
-* C-c f:                                dmacro-prompt.
-* C-c l:                                dmacro-wrap-line.
-* C-c r:                                dmacro-wrap-region.
+* C-c C-d:                               dmacro-build-command. (line  6)
+* C-c C-m:                               dmacro-build-modifier.
+                                                               (line  6)
+* C-c d:                                 insert-dmacro.        (line  6)
+* C-c d ?:                               insert-dmacro.        (line  6)
+* C-c f:                                 dmacro-prompt.        (line 19)
+* C-c l:                                 dmacro-wrap-line.     (line  6)
+* C-c r:                                 dmacro-wrap-region.   (line  6)
 
 
 File: dmacro.info,  Node: Function and Variable Index,  Next: Concept Index,  Prev: Key Index,  Up: Top
@@ -1507,59 +1508,64 @@ File: dmacro.info,  Node: Function and Variable Index,  Next: Concept Index,  Pr
 Function and Variable Index
 ***************************
 
+ [index ]
 * Menu:
 
-* @:                                    Functions.
-* ampm:                                 Functions.
-* auto-dmacro-alist:                    Auto Insertion.
-* cap:                                  Casification.
-* chron:                                Functions.
-* date:                                 Functions.
-* day:                                  Functions.
-* def-dmacro-alias:                     Defining Aliases.
-* def-dmacro-function:                  Defining Functions.
-* dmacro:                               Functions.
-* dmacro-build:                         dmacro-build.
-* dmacro-build-command:                 dmacro-build-command.
-* dmacro-build-modifier:                dmacro-build-modifier.
-* dmacro-command:                       Binding Dmacros to Keys.
-* dmacro-fill-in-blanks:                dmacro-prompt.
-* dmacro-month-names:                   dmacro-month-names.
-* dmacro-prefix-char:                   dmacro-prefix-char.
-* dmacro-prompt:                        dmacro-prompt.
-* dmacro-rank-in-initials:              dmacro-rank-in-initials.
-* dmacro-save:                          dmacro-save.
-* dmacro-wrap-line:                     dmacro-wrap-line.
-* dmacro-wrap-region:                   dmacro-wrap-region.
-* dont-bind-my-keys:                    dont-bind-my-keys.
-* down:                                 Casification.
-* eval <1>:                             Defining Functions.
-* eval:                                 Functions.
-* file:                                 Functions.
-* file-dir:                             Functions.
-* file-ext:                             Functions.
-* file-long:                            Functions.
-* file-name:                            Functions.
-* hour:                                 Functions.
-* hour24:                               Functions.
-* if:                                   Functions.
-* insert-dmacro:                        insert-dmacro.
-* insert-file:                          Functions.
-* min:                                  Functions.
-* mon:                                  Functions.
-* month:                                Functions.
-* month-num:                            Functions.
-* pad:                                  Padding.
-* prompt:                               Functions.
-* sec:                                  Functions.
-* sexp:                                 Sub-expressions.
-* shell:                                Functions.
-* up:                                   Casification.
-* user-id:                              Functions.
-* user-initials:                        Functions.
-* user-name:                            Functions.
-* year:                                 Functions.
-* ~:                                    Functions.
+* @:                                     Functions.           (line 184)
+* ampm:                                  Functions.           (line 184)
+* auto-dmacro-alist:                     Auto Insertion.      (line   6)
+* cap:                                   Casification.        (line   6)
+* chron:                                 Functions.           (line 184)
+* date:                                  Functions.           (line 184)
+* day:                                   Functions.           (line 184)
+* def-dmacro-alias:                      Defining Aliases.    (line   6)
+* def-dmacro-function:                   Defining Functions.  (line   6)
+* dmacro:                                Functions.           (line 184)
+* dmacro-build:                          dmacro-build.        (line   6)
+* dmacro-build-command:                  dmacro-build-command.
+                                                              (line   6)
+* dmacro-build-modifier:                 dmacro-build-modifier.
+                                                              (line   6)
+* dmacro-command:                        Binding Dmacros to Keys.
+                                                              (line   6)
+* dmacro-fill-in-blanks:                 dmacro-prompt.       (line  19)
+* dmacro-month-names:                    dmacro-month-names.  (line   6)
+* dmacro-prefix-char:                    dmacro-prefix-char.  (line   6)
+* dmacro-prompt:                         dmacro-prompt.       (line   6)
+* dmacro-rank-in-initials:               dmacro-rank-in-initials.
+                                                              (line   6)
+* dmacro-save:                           dmacro-save.         (line   6)
+* dmacro-wrap-line:                      dmacro-wrap-line.    (line   6)
+* dmacro-wrap-region:                    dmacro-wrap-region.  (line   6)
+* dont-bind-my-keys:                     dont-bind-my-keys.   (line   6)
+* down:                                  Casification.        (line   6)
+* eval <1>:                              Defining Functions.  (line   6)
+* eval:                                  Functions.           (line 184)
+* file:                                  Functions.           (line 184)
+* file-dir:                              Functions.           (line 184)
+* file-ext:                              Functions.           (line 184)
+* file-long:                             Functions.           (line 184)
+* file-name:                             Functions.           (line 184)
+* hour:                                  Functions.           (line 184)
+* hour24:                                Functions.           (line 184)
+* if:                                    Functions.           (line 184)
+* insert-dmacro:                         insert-dmacro.       (line   6)
+* insert-file:                           Functions.           (line 184)
+* min:                                   Functions.           (line 184)
+* mon:                                   Functions.           (line 184)
+* month:                                 Functions.           (line 184)
+* month-num:                             Functions.           (line 184)
+* pad:                                   Padding.             (line   6)
+* prompt:                                Functions.           (line 184)
+* sec:                                   Functions.           (line 184)
+* sexp:                                  Sub-expressions.     (line   6)
+* shell:                                 Functions.           (line 184)
+* up:                                    Casification.        (line   6)
+* user-id:                               Functions.           (line 184)
+* user-initials:                         Functions.           (line 184)
+* user-name:                             Functions.           (line 184)
+* year:                                  Functions.           (line 184)
+* ~:                                     Functions.           (line 184)
 
 
 File: dmacro.info,  Node: Concept Index,  Prev: Function and Variable Index,  Up: Top
@@ -1567,75 +1573,76 @@ File: dmacro.info,  Node: Concept Index,  Prev: Function and Variable Index,  Up
 Concept Index
 *************
 
+ [index ]
 * Menu:
 
-* aliases:                              Defining Aliases.
-* automatic macro insertion:            Auto Insertion.
-* case modifiers:                       Casification.
-* completion in the minibuffer:         Tutorial.
-* DM-C:                                 Tutorial.
-* Dmacro tables:                        Creating Macros.
-* dmacros for C:                        Tutorial.
-* marks:                                dmacro-wrap-line.
-* masthead:                             Auto Insertion.
-* modifiers:                            Modifiers.
-* padding modifier:                     Padding.
-* post-expansion:                       dmacro-prompt.
-* pre-expansion:                        dmacro-prompt.
-* sub-expressions:                      Sub-expressions.
-* substrings:                           Substrings.
-* wrapping a line:                      dmacro-wrap-line.
-* wrapping a region:                    dmacro-wrap-region.
+* aliases:                               Defining Aliases.     (line  6)
+* automatic macro insertion:             Auto Insertion.       (line 13)
+* case modifiers:                        Casification.         (line  6)
+* completion in the minibuffer:          Tutorial.             (line 74)
+* DM-C:                                  Tutorial.             (line  6)
+* Dmacro tables:                         Creating Macros.      (line 13)
+* dmacros for C:                         Tutorial.             (line  6)
+* marks:                                 dmacro-wrap-line.     (line 16)
+* masthead:                              Auto Insertion.       (line 13)
+* modifiers:                             Modifiers.            (line  6)
+* padding modifier:                      Padding.              (line  6)
+* post-expansion:                        dmacro-prompt.        (line 14)
+* pre-expansion:                         dmacro-prompt.        (line 27)
+* sub-expressions:                       Sub-expressions.      (line  6)
+* substrings:                            Substrings.           (line  6)
+* wrapping a line:                       dmacro-wrap-line.     (line  6)
+* wrapping a region:                     dmacro-wrap-region.   (line  6)
 
 
 
 Tag Table:
-Node: Top167
-Node: Administrivia925
-Node: Overview1741
-Node: Tutorial2843
-Node: Using Dmacro13246
-Node: dmacro-load13789
-Node: insert-dmacro14264
-Node: dmacro-wrap-line14954
-Node: dmacro-wrap-region16670
-Node: Installation17279
-Node: Creating Macros18437
-Node: Dmacro Builder19571
-Node: dmacro-build20192
-Node: dmacro-build-command21192
-Node: dmacro-build-modifier21928
-Node: dmacro-save22625
-Node: Dmacro Files22933
-Node: Name24474
-Node: Expander24684
-Node: Documentation25106
-Node: Text25406
-Node: Shortcuts26280
-Node: Directives26771
-Node: Functions27165
-Node: Modifiers33087
-Node: Casification33661
-Node: Padding34012
-Node: Substrings34798
-Node: Sub-expressions35478
-Node: Auto Insertion35950
-Node: Binding Dmacros to Keys37297
-Node: Customization38680
-Node: Interface Options39322
-Node: dont-bind-my-keys39502
-Node: dmacro-prompt40005
-Node: Expansion Options41859
-Node: dmacro-month-names42073
-Node: dmacro-prefix-char42517
-Node: dmacro-rank-in-initials42921
-Node: Defining New Directives43413
-Node: Defining Aliases44025
-Node: Defining Functions45359
-Node: Release Notes46611
-Node: Glossary47985
-Node: Key Index49266
-Node: Function and Variable Index49807
-Node: Concept Index52735
+Node: Top149
+Node: Administrivia907
+Node: Overview1722
+Node: Tutorial2821
+Node: Using Dmacro13149
+Node: dmacro-load13693
+Node: insert-dmacro14175
+Node: dmacro-wrap-line14871
+Node: dmacro-wrap-region16582
+Node: Installation17200
+Node: Creating Macros18359
+Node: Dmacro Builder19494
+Node: dmacro-build20120
+Node: dmacro-build-command21125
+Node: dmacro-build-modifier21870
+Node: dmacro-save22579
+Node: Dmacro Files22898
+Node: Name24422
+Node: Expander24641
+Node: Documentation25073
+Node: Text25382
+Node: Shortcuts26265
+Node: Directives26764
+Node: Functions27163
+Node: Modifiers33097
+Node: Casification33680
+Node: Padding34044
+Node: Substrings34843
+Node: Sub-expressions35536
+Node: Auto Insertion36021
+Node: Binding Dmacros to Keys37373
+Node: Customization38761
+Node: Interface Options39404
+Node: dont-bind-my-keys39592
+Node: dmacro-prompt40103
+Node: Expansion Options41966
+Node: dmacro-month-names42188
+Node: dmacro-prefix-char42641
+Node: dmacro-rank-in-initials43054
+Node: Defining New Directives43555
+Node: Defining Aliases44168
+Node: Defining Functions45487
+Node: Release Notes46744
+Node: Glossary48122
+Node: Key Index49407
+Node: Function and Variable Index50127
+Node: Concept Index54295
 
 End Tag Table
